@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block header_title %}{{ site.name }}{% endblock %}
+{% block content %}
+
+<div class="grid-main">
+  <div class="column">
+    <div class="card-block">
+      <h2>Asosiy ma'lumotlar</h2>
+      <ul class="list">
+        <li><b>Nomi:</b> {{ site.name }}</li>
+        <li><b>Joylashuvi:</b> {{ site.location or "—" }}</li>
+        <li><b>Quvvati:</b> {{ site.capacity_kw or 0 }} kW</li>
+        <li><b>External URL:</b>
+          {% if site.external_url %}
+            <a href="{{ site.external_url }}" target="_blank">{{ site.external_url }}</a>
+          {% else %}
+            — 
+          {% endif %}
+        </li>
+        <li><b>Hozirgi quvvat:</b> {{ site.last_power_kw or 0 }} kW</li>
+        <li><b>Bugungi energiya:</b> {{ site.last_energy_today_kwh or 0 }} kWh</li>
+        <li><b>Oxirgi yangilanish:</b> {{ site.last_updated_at or "—" }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="card-block">
+      <h2>So‘nggi 14 kun energiya grafigi</h2>
+      <canvas id="siteChart" height="220"></canvas>
+    </div>
+
+    <div class="card-block">
+      <h2>Kunlik tafsilotlar</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Sana</th>
+            <th>Energiya (kWh)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in readings %}
+          <tr>
+            <td>{{ r.date }}</td>
+            <td>{{ r.energy_kwh }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="2" class="empty-text">Malumotlar mavjud emas.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const labels = {{ chart_labels|safe }};   // masalan ["2025-11-10", ...]
+  const values = {{ chart_values|safe }};   // [100, 120, ...]
+
+  const ctx2 = document.getElementById('siteChart').getContext('2d');
+  new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Kunlik energiya (kWh)',
+        data: values
+      }]
+    },
+    options:{
+      plugins:{ legend:{ labels:{ color:'#fff' } } },
+      scales:{
+        x:{ ticks:{ color:'#ccc' }, grid:{ color:'#333'} },
+        y:{ ticks:{ color:'#ccc' }, grid:{ color:'#333'} }
+      }
+    }
+  });
+</script>
+
+{% endblock %}
