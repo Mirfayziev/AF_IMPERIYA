@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block header_title %}Yangi tashkilot{% endblock %}
+{% block content %}
+
+<div class="card big-card">
+
+  <h2>Yangi tashkilot qo‘shish</h2>
+
+  <form method="post">
+
+      <label>Tashkilot nomi</label>
+      <input type="text" name="name" required>
+
+      <label>Xodimlar soni</label>
+      <input type="number" name="employee_count">
+
+      <label>Joylashuvi (manzil)</label>
+      <input type="text" name="address">
+
+      <label>Qavati</label>
+      <input type="text" name="floor">
+
+      <label>Izoh (ixtiyoriy)</label>
+      <textarea name="comment" rows="3"></textarea>
+
+      <button class="btn btn-primary" style="margin-top:15px;">Saqlash</button>
+
+  </form>
+
+</div>
+
+<style>
+.big-card{
+  padding:25px;
+  max-width:600px;
+  margin:auto;
+}
+input,textarea{
+  width:100%;
+  background:#222634;
+  border:1px solid #2e3448;
+  color:#fff;
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:12px;
+}
+</style>
+
+{% endblock %}
