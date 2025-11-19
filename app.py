@@ -17,6 +17,7 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 def inject_today():
     return {"today": date.today()}
 
+# ---- auth utils ----
 def login_required(fn):
     from functools import wraps
     @wraps(fn)
@@ -73,7 +74,7 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# ---- Manager dashboard (premium UI) ----
+# ---------- Rahbar paneli (rasmga o‘xshash premium dashboard) ----------
 @app.route("/manager/dashboard")
 @login_required
 @role_required("manager", "admin")
@@ -102,134 +103,23 @@ def manager_dashboard():
         active_employees=active_employees,
     )
 
-# ---- Vehicles ----
-@app.route("/vehicles")
-@login_required
-def vehicles_list():
-    vehicles = Vehicle.query.order_by(Vehicle.id.desc()).all()
-    return render_template("vehicles/list.html", vehicles=vehicles)
+# --------- qolgan modullarni keyin to‘ldiramiz (hozir senga asosiylari kifoya) ---------
 
-@app.route("/vehicles/create", methods=["GET", "POST"])
-@login_required
-def vehicles_create():
-    orgs = Organization.query.order_by(Organization.name).all()
-    if request.method == "POST":
-        plate = request.form.get("plate_number")
-        model = request.form.get("model")
-        driver = request.form.get("driver_full_name")
-        limit = float(request.form.get("monthly_fuel_limit") or 0)
-        org_id = request.form.get("organization_id") or None
-        image_file = request.files.get("image")
-        image_path = None
-        if image_file and image_file.filename:
-            filename = secure_filename(image_file.filename)
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-            image_file.save(save_path)
-            image_path = filename
-        v = Vehicle(
-            plate_number=plate,
-            model=model,
-            driver_full_name=driver,
-            monthly_fuel_limit=limit,
-            organization_id=int(org_id) if org_id else None,
-            image_path=image_path,
-        )
-        db.session.add(v)
-        db.session.commit()
-        flash("Transport qo'shildi", "success")
-        return redirect(url_for("vehicles_list"))
-    return render_template("vehicles/form.html", orgs=orgs)
-
-@app.route("/vehicles/<int:vehicle_id>")
-@login_required
-def vehicles_detail(vehicle_id):
-    v = Vehicle.query.get_or_404(vehicle_id)
-    return render_template("vehicles/detail.html", v=v)
-
-# ---- Organizations ----
-@app.route("/organizations")
-@login_required
-def orgs_list():
-    orgs = Organization.query.order_by(Organization.name).all()
-    return render_template("orgs/list.html", orgs=orgs)
-
-@app.route("/organizations/create", methods=["GET", "POST"])
-@login_required
-def orgs_create():
-    if request.method == "POST":
-        o = Organization(
-            name=request.form.get("name"),
-            employee_count=int(request.form.get("employee_count") or 0),
-            address=request.form.get("address"),
-            floor=request.form.get("floor"),
-            comment=request.form.get("comment"),
-        )
-        db.session.add(o)
-        db.session.commit()
-        flash("Tizim tashkiloti qo'shildi", "success")
-        return redirect(url_for("orgs_list"))
-    return render_template("orgs/form.html", org=None)
-
-@app.route("/organizations/<int:org_id>")
-@login_required
-def orgs_detail(org_id):
-    org = Organization.query.get_or_404(org_id)
-    return render_template("orgs/detail.html", org=org)
-
-# ---- Simple placeholders for required modules ----
 @app.route("/admin")
 @login_required
 @role_required("admin")
 def admin_panel():
-    return render_template("admin/panel.html")
+    return render_template("admin/dashboard.html")
 
 @app.route("/employee")
 @login_required
 @role_required("employee", "manager", "admin")
 def employee_panel():
-    return render_template("employee/panel.html")
+    return render_template("employee/dashboard.html")
 
-@app.route("/outsourcing")
-@login_required
-def outsourcing_panel():
-    companies = OutsourceCompany.query.all()
-    return render_template("outsourcing/list.html", companies=companies)
-
-@app.route("/orgtech")
-@login_required
-def orgtech_panel():
-    devices = OrgTech.query.all()
-    return render_template("orgtech/list.html", devices=devices)
-
-@app.route("/contracts")
-@login_required
-def contracts_list():
-    contracts = Contract.query.order_by(Contract.created_at.desc()).all()
-    return render_template("contracts/list.html", contracts=contracts)
-
-@app.route("/ijro")
-@login_required
-def ijro_panel():
-    tasks = IjroTask.query.order_by(IjroTask.date.asc()).all()
-    return render_template("ijro/list.html", tasks=tasks)
-
-@app.route("/hr")
-@login_required
-def hr_panel():
-    employees = User.query.filter_by(role="employee").all()
-    profiles = EmployeeProfile.query.all()
-    return render_template("hr/list.html", employees=employees, profiles=profiles)
-
-@app.route("/solar")
-@login_required
-def solar_panel():
-    sites = SolarSite.query.all()
-    return render_template("solar/list.html", sites=sites)
-
-# ---- DB init with demo data ----
+# DB init (demo userlar)
 with app.app_context():
     db.create_all()
-    # default users
     if not User.query.filter_by(username="admin").first():
         db.session.add(User(username="admin", password_hash=generate_password_hash("admin123"), role="admin"))
     if not User.query.filter_by(username="manager").first():
@@ -237,21 +127,6 @@ with app.app_context():
     if not User.query.filter_by(username="employee").first():
         db.session.add(User(username="employee", password_hash=generate_password_hash("employee123"), role="employee"))
     db.session.commit()
-
-    # demo org/vehicles/contracts/tasks
-    if not Organization.query.first():
-        o1 = Organization(name="AF Bosh ofis", employee_count=50, address="Toshkent, Yunusobod", floor="3-qavat")
-        db.session.add(o1)
-        db.session.commit()
-        v1 = Vehicle(plate_number="01A123BC", model="Cobalt", driver_full_name="Aliyev Anvar", monthly_fuel_limit=150, organization_id=o1.id)
-        v2 = Vehicle(plate_number="01B456CD", model="Damas", driver_full_name="Karimov Bekzod", monthly_fuel_limit=120, organization_id=o1.id)
-        db.session.add_all([v1, v2])
-        c1 = Contract(title="Elektr energiyasi shartnomasi", amount=18225670, status="Aktiv")
-        db.session.add(c1)
-        t1 = Task(title="Serverlarni tekshirish", description="Yangi versiyani stagingda sinash", status="in_progress", assigned_to_id=3)
-        t2 = Task(title="Hisobot tayyorlash", description="Oy yakuniy hisobot", status="new", assigned_to_id=3)
-        db.session.add_all([t1, t2])
-        db.session.commit()
 
 if __name__ == "__main__":
     app.run(debug=True)
