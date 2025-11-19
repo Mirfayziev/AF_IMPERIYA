@@ -1,47 +1,160 @@
 {% extends "base.html" %}
-{% block page_title %}Xodim paneli{% endblock %}
 {% block header_title %}Xodim paneli{% endblock %}
 {% block content %}
-<div class="grid-main">
-  <div class="card-block">
-    <div class="card-header">
-      <h2>Menga biriktirilgan topshiriqlar</h2>
+
+<div class="page-title">
+    <h1>Salom, {{ session.get('username') }}!</h1>
+    <p class="subtitle">Sizga biriktirilgan topshiriqlar va modullar</p>
+</div>
+
+<!-- 1-QATOR — ASOSIY STATLAR -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-label">Bugungi topshiriqlar</div>
+        <div class="stat-value">{{ today_tasks or 0 }}</div>
+        <div class="stat-foot">Ijro va umumiy topshiriqlar</div>
     </div>
-    <div class="task-short-list">
-      {% for t in my_tasks %}
-      <div class="task-row">
-        <div class="task-main">
-          <div class="task-title">{{ t.title }}</div>
-          <div class="task-meta">Muddat: {{ t.due_date or '—' }}</div>
-        </div>
-        <div class="task-status-pill status-{{ t.status }}">{{ t.status }}</div>
-      </div>
-      {% else %}
-      <div class="empty-text">Sizga biriktirilgan topshiriqlar yo'q.</div>
-      {% endfor %}
+    <div class="stat-card">
+        <div class="stat-label">Yangi topshiriqlar</div>
+        <div class="stat-value">{{ new_tasks or 0 }}</div>
+        <div class="stat-foot">Tasdiqlanmagan</div>
     </div>
-  </div>
-  <div class="card-block">
-    <div class="card-header"><h2>Ijro topshiriqlari</h2></div>
-    <ul class="list">
-      {% for t in ijro %}
-      <li>{{ t.title }} – {{ t.start_date }} → {{ t.due_date }} ({{ t.status }})</li>
-      {% else %}
-      <li class="empty-text">Ijro topshiriqlari yo'q.</li>
-      {% endfor %}
-    </ul>
-  </div>
-  <div class="card-block">
-    <div class="card-header"><h2>Shaxsiy ma'lumotlar</h2></div>
-    {% if profile %}
-    <ul class="list">
-      <li><b>Pasport:</b> {{ profile.passport_number }}</li>
-      <li><b>Diplom:</b> {{ profile.diploma_info }}</li>
-      <li><b>Boshqa:</b> {{ profile.other_info }}</li>
-    </ul>
-    {% else %}
-    <div class="empty-text">Profil ma'lumotlari kiritilmagan.</div>
+    <div class="stat-card">
+        <div class="stat-label">Bajarilgan topshiriqlar</div>
+        <div class="stat-value">{{ completed_tasks or 0 }}</div>
+        <div class="stat-foot">Oxirgi 7 kun</div>
+    </div>
+</div>
+
+<!-- 2-QATOR — XODIMGA TEGISHLI MODULLAR -->
+<div class="card-block">
+  <h2>Menga biriktirilgan modullar</h2>
+
+  <div class="modules-grid">
+
+    {% if 'tasks' in employee_modules %}
+    <a href="/tasks" class="module-card">
+      <div class="module-title">Umumiy topshiriqlar</div>
+      <div class="module-desc">Sizga biriktirilgan barcha topshiriqlar.</div>
+    </a>
     {% endif %}
+
+    {% if 'ijro' in employee_modules %}
+    <a href="/ijro" class="module-card">
+      <div class="module-title">Ijro paneli</div>
+      <div class="module-desc">Muddatli ijro topshiriqlar.</div>
+    </a>
+    {% endif %}
+
+    {% if 'orgtech' in employee_modules %}
+    <a href="/orgtech" class="module-card">
+      <div class="module-title">OrgTexnika</div>
+      <div class="module-desc">Sizga biriktirilgan texnikalar.</div>
+    </a>
+    {% endif %}
+
+    {% if 'vehicles' in employee_modules %}
+    <a href="/vehicles" class="module-card">
+      <div class="module-title">Transport</div>
+      <div class="module-desc">Sizga biriktirilgan transport vositalari.</div>
+    </a>
+    {% endif %}
+
+    {% if 'hr' in employee_modules %}
+    <a href="/hr" class="module-card">
+      <div class="module-title">Shaxsiy ma’lumotlar</div>
+      <div class="module-desc">Pasport, diplom, hujjatlar.</div>
+    </a>
+    {% endif %}
+
   </div>
 </div>
+
+<!-- 3-QATOR — BUGUNGI TOPSHIRIQLAR -->
+<div class="card-block">
+  <h2>Bugungi topshiriqlar</h2>
+
+  <div class="task-short-list">
+
+    {% for t in today_task_list %}
+    <div class="task-row" onclick="window.location='/tasks/{{ t.id }}'">
+      <div class="task-main">
+        <div class="task-title">{{ t.title }}</div>
+        <div class="task-meta">
+          Muddat: <b>{{ t.due_date }}</b>
+        </div>
+      </div>
+      <div class="task-status-pill status-{{ t.status }}">{{ t.status }}</div>
+    </div>
+    {% else %}
+      <div class="empty-text">Bugungi topshiriq yo‘q.</div>
+    {% endfor %}
+
+  </div>
+</div>
+
+<!-- 4-QATOR — MINI KALENDAR (Ijro uchun) -->
+<div class="card-block">
+  <h2>Ijro kalendari (mini)</h2>
+  <div class="mini-calendar">{{ mini_calendar|safe }}</div>
+</div>
+
+<style>
+.page-title h1{ font-size:26px; color:#fff; margin-bottom:2px; }
+.page-title .subtitle{ font-size:13px; opacity:0.7; }
+
+/* STAT CARDS */
+.stats-row{
+    display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;
+}
+.stat-card{
+    flex:1; min-width:160px;
+    background:#1b1f2a; border-radius:12px;
+    padding:12px 14px; border:1px solid #2e3448;
+}
+.stat-label{ font-size:12px; opacity:0.7; }
+.stat-value{ font-size:22px; margin-top:4px; }
+.stat-foot{ font-size:11px; opacity:0.6; }
+
+/* MODULES */
+.modules-grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px;
+}
+.module-card{
+  display:block; background:#1c1f2b; border-radius:12px;
+  padding:14px; border:1px solid #2e3448; color:#fff;
+  transition:0.2s; cursor:pointer;
+}
+.module-card:hover{
+  border-color:#4b6bff; transform:translateY(-2px);
+}
+.module-title{ font-size:16px; margin-bottom:3px; }
+.module-desc{ opacity:0.7; font-size:13px; }
+
+/* TASK LIST */
+.task-row{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px; margin-bottom:8px;
+  background:#1c1f2b; border-radius:10px;
+  border:1px solid #2e3448; cursor:pointer; transition:0.2s;
+}
+.task-row:hover{ border-color:#4b6bff; }
+.task-title{ font-size:15px; margin-bottom:2px; }
+.task-status-pill{
+  padding:6px 10px; border-radius:6px; font-size:11px; text-transform:uppercase;
+}
+.status-new{ background:#4b6bff; }
+.status-in_progress{ background:#f7b500; }
+.status-done{ background:#00c853; }
+.status-rejected{ background:#ff5252; }
+
+/* MINI CALENDAR */
+.mini-calendar{
+  font-size:14px; opacity:0.9;
+  background:#1c1f2b; padding:18px;
+  border-radius:12px; border:1px solid #2e3448;
+}
+
+</style>
+
 {% endblock %}
