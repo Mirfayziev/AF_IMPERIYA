@@ -1,136 +1,56 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>{% block page_title %}AF Imperiya{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="utf-8">
+    <title>{% block header_title %}AI IMPERIYA{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
+
 <body>
 
-<div class="app-shell">
+<div class="layout">
 
+    <!-- SIDEBAR -->
     <aside class="sidebar">
-        <div class="sidebar-top">
-            <div class="logo-wrap">
-                <img src="{{ url_for('static', filename='img/logo_af.png') }}" class="logo-img" alt="AF logo">
-            </div>
-            <div class="user-info">
-                <div class="user-name">AF Imperiya</div>
-                {% set role = session.get('user_role') %}
-                <div class="user-role">
-                    {% if role == 'manager' %}Rahbar paneli{% elif role == 'admin' %}Admin paneli{% else %}Xodim paneli{% endif %}
-                </div>
-            </div>
+
+        <div class="logo-wrap">
+            <img src="{{ url_for('static', filename='img/af_logo.png') }}" class="logo">
+            <div class="logo-text">AI IMPERIYA</div>
         </div>
 
-        {% set role = session.get('user_role') %}
+        <nav class="menu">
 
-        <nav class="sidebar-menu">
-            {% if role in ['manager', 'admin'] %}
-                <a href="{{ url_for('manager_dashboard') }}" class="menu-item{% if request.endpoint == 'manager_dashboard' %} active{% endif %}">
-                    <span class="menu-icon">📊</span><span class="menu-text">Topshiriqlar</span>
-                </a>
+            {% if session.get("user_role") == "admin" %}
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/organizations">Tashkilotlar</a>
+            <a href="/vehicles">Transport</a>
+            <a href="/orgtech">OrgTexnika</a>
+            <a href="/outsourcing">Outsorsing</a>
+            <a href="/solar">Solar</a>
+            <a href="/ijro">Ijro</a>
+            <a href="/hr/list">Xodimlar</a>
             {% endif %}
 
-            {% if role in ['manager', 'admin'] %}
-                <a href="{{ url_for('vehicles_list') }}" class="menu-item{% if 'vehicles_' in request.endpoint or request.endpoint == 'vehicles_list' %} active{% endif %}">
-                    <span class="menu-icon">🚗</span><span class="menu-text">Avtotransportlar</span>
-                </a>
+            {% if session.get("user_role") == "manager" %}
+            <a href="/manager/dashboard">Dashboard</a>
+            <a href="/ijro">Ijro</a>
+            <a href="/vehicles">Transport</a>
+            <a href="/solar">Solar</a>
             {% endif %}
 
-            {% if role in ['manager', 'admin'] %}
-                <a href="{{ url_for('contracts_list') }}" class="menu-item{% if request.endpoint == 'contracts_list' %} active{% endif %}">
-                    <span class="menu-icon">📄</span><span class="menu-text">Shartnomalar</span>
-                </a>
+            {% if session.get("user_role") == "employee" %}
+            <a href="/employee/dashboard">Mening panelim</a>
+            <a href="/ijro">Ijro</a>
+            <a href="/hr/profile/{{ session.get('user_id') }}">Profil</a>
             {% endif %}
 
-            {% if role in ['manager', 'admin'] %}
-                <a href="{{ url_for('outsourcing_panel') }}" class="menu-item{% if request.endpoint == 'outsourcing_panel' %} active{% endif %}">
-                    <span class="menu-icon">🤝</span><span class="menu-text">Outsorsing</span>
-                </a>
-            {% endif %}
-
-            {% if role in ['manager', 'admin'] %}
-                <a href="{{ url_for('orgtech_panel') }}" class="menu-item{% if request.endpoint == 'orgtech_panel' %} active{% endif %}">
-                    <span class="menu-icon">🖨</span><span class="menu-text">Orgtexnika</span>
-                </a>
-            {% endif %}
-
-            {% if role in ['manager', 'admin'] %}
-                <a href="{{ url_for('orgs_list') }}" class="menu-item{% if request.endpoint.startswith('orgs_') %} active{% endif %}">
-                    <span class="menu-icon">🏢</span><span class="menu-text">Tizim tashkilotlar</span>
-                </a>
-            {% endif %}
-
-            {% if role in ['manager', 'admin'] %}
-                <a href="{{ url_for('ijro_panel') }}" class="menu-item{% if request.endpoint == 'ijro_panel' or request.endpoint=='ijro_create' %} active{% endif %}">
-                    <span class="menu-icon">📅</span><span class="menu-text">Ijro</span>
-                </a>
-            {% endif %}
-
-            {% if role in ['manager', 'admin'] %}
-                <a href="{{ url_for('solar_panel') }}" class="menu-item{% if request.endpoint == 'solar_panel' %} active{% endif %}">
-                    <span class="menu-icon">☀</span><span class="menu-text">Solar</span>
-                </a>
-            {% endif %}
-
-            {% if role in ['manager', 'admin'] %}
-                <a href="{{ url_for('hr_panel') }}" class="menu-item{% if request.endpoint == 'hr_panel' %} active{% endif %}">
-                    <span class="menu-icon">👥</span><span class="menu-text">Xodimlar</span>
-                </a>
-            {% endif %}
-
-            {% if role == 'employee' %}
-                <a href="{{ url_for('employee_panel') }}" class="menu-item{% if request.endpoint == 'employee_panel' %} active{% endif %}">
-                    <span class="menu-icon">📌</span><span class="menu-text">Mening topshiriqlarim</span>
-                </a>
-                <a href="{{ url_for('ijro_panel') }}" class="menu-item{% if request.endpoint == 'ijro_panel' %} active{% endif %}">
-                    <span class="menu-icon">📅</span><span class="menu-text">Ijro</span>
-                </a>
-            {% endif %}
+            <a href="/logout" class="logout">Chiqish</a>
         </nav>
-
-        <div class="sidebar-bottom">
-            <a href="{{ url_for('logout') }}" class="menu-item logout">
-                <span class="menu-icon">🚪</span><span class="menu-text">Chiqish</span>
-            </a>
-        </div>
     </aside>
 
-    <main class="main-panel">
-        <header class="topbar">
-            <div class="topbar-left">
-                <h1 class="topbar-title">
-                    {% block header_title %}Panel{% endblock %}
-                </h1>
-            </div>
-            <div class="topbar-right">
-                <div class="search-box">
-                    <input type="text" placeholder="Qidirish..." />
-                </div>
-                <div class="topbar-user">
-                    <div class="avatar-small">AF</div>
-                    <div class="topbar-user-name">
-                        {% if role == 'manager' %}Rahbar{% elif role == 'admin' %}Admin{% else %}Xodim{% endif %}
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <section class="top-messages">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash flash-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-            {% endwith %}
-        </section>
-
-        <section class="dashboard-content">
-            {% block content %}{% endblock %}
-        </section>
+    <!-- MAIN CONTENT -->
+    <main class="content">
+        {% block content %}{% endblock %}
     </main>
 </div>
 
