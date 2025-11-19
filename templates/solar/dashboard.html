@@ -1,21 +1,139 @@
 {% extends "base.html" %}
-{% block page_title %}Solar panel{% endblock %}
-{% block header_title %}Solar kuzatuv paneli{% endblock %}
+{% block header_title %}Solar energiya paneli{% endblock %}
 {% block content %}
-<div class="card-block">
-  <table class="table compact-table">
-    <thead><tr><th>Obyekt</th><th>Quvvati (kW)</th><th>Tashqi sayt</th></tr></thead>
-    <tbody>
-      {% for s in sites %}
-      <tr>
-        <td>{{ s.name }}</td>
-        <td>{{ s.capacity_kw }}</td>
-        <td>{% if s.external_url %}<a href="{{ s.external_url }}" target="_blank">Ko'rish</a>{% endif %}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="3" class="empty-text">Solar obyektlari yo'q.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+<div class="grid-main">
+
+  <div class="column">
+    <div class="card-block">
+      <h2>Umumiy ko‘rsatkichlar</h2>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Hozirgi quvvat</div>
+          <div class="stat-value">{{ total_power_kw or 0 }} kW</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Bugungi energiya</div>
+          <div class="stat-value">{{ total_energy_today_kwh or 0 }} kWh</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Stansiyalar soni</div>
+          <div class="stat-value">{{ sites|length }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-block">
+      <div class="card-header">
+        <h2>Solar stansiyalar ro‘yxati</h2>
+        {# keyinchalik "Yangi stansiya qo‘shish" uchun knopka qo‘shamiz #}
+      </div>
+
+      <div class="task-short-list">
+        {% for s in sites %}
+        <div class="task-row" onclick="window.location='/solar/{{ s.id }}'">
+          <div class="task-main">
+            <div class="task-title">{{ s.name }}</div>
+            <div class="task-meta">
+              {{ s.location or "Manzil kiritilmagan" }}
+              • Quvvat: {{ s.capacity_kw or 0 }} kW
+            </div>
+          </div>
+          <div class="task-status-pill">
+            {{ s.last_power_kw or 0 }} kW<br>
+            <small>Bugun: {{ s.last_energy_today_kwh or 0 }} kWh</small>
+          </div>
+        </div>
+        {% else %}
+        <div class="empty-text">Solar stansiyalar hali kiritilmagan.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="card-block">
+      <h2>So‘nggi 7 kunlik energiya (kWh)</h2>
+      <canvas id="solarChart" height="220"></canvas>
+    </div>
+
+    <div class="card-block">
+      <h2>Real-time manba</h2>
+      <p class="small-text">
+        Quyidagi manzillar orqali real-time ma’lumot olinadi (API / sayt).
+      </p>
+      <ul class="list">
+        {% for s in sites %}
+          {% if s.external_url %}
+          <li>
+            <b>{{ s.name }}:</b>
+            <a href="{{ s.external_url }}" target="_blank">{{ s.external_url }}</a>
+          </li>
+          {% endif %}
+        {% else %}
+          <li>Hali hech qanday manba URL kiritilmagan.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
 </div>
+
+<style>
+.stats-row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.stat-card{
+  flex:1;
+  min-width:140px;
+  background:#1b1f2a;
+  border-radius:12px;
+  padding:12px 14px;
+  border:1px solid #2e3448;
+}
+.stat-label{
+  font-size:12px;
+  opacity:0.7;
+}
+.stat-value{
+  font-size:20px;
+  margin-top:4px;
+}
+.small-text{
+  font-size:13px;
+  opacity:0.8;
+}
+</style>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const solarLabels = {{ chart_labels|safe }};     // masalan: ["2025-11-13","2025-11-14",...]
+  const solarData   = {{ chart_values|safe }};     // masalan: [120, 140, 110, ...]
+
+  const ctx = document.getElementById('solarChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: solarLabels,
+      datasets: [{
+        label: 'Kunda ishlab chiqarilgan energiya (kWh)',
+        data: solarData,
+        tension: 0.3
+      }]
+    },
+    options: {
+      plugins:{
+        legend:{ labels:{ color:'#fff' } }
+      },
+      scales:{
+        x:{ ticks:{ color:'#ccc' }, grid:{ color:'#333'} },
+        y:{ ticks:{ color:'#ccc' }, grid:{ color:'#333'} }
+      }
+    }
+  });
+</script>
+
 {% endblock %}
