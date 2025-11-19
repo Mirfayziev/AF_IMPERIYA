@@ -12,7 +12,7 @@
     <div class="stat-card green">
         <div class="stat-label">Bajarilgan</div>
         <div class="stat-value">{{ done_tasks or 0 }}</div>
-        <div class="stat-sub">Yakunlanganlar</div>
+        <div class="stat-sub">Yakunlangan topshiriqlar</div>
     </div>
     <div class="stat-card blue">
         <div class="stat-label">Jarayonda</div>
@@ -71,7 +71,7 @@
                 </div>
                 <div class="event-row">
                     <div>
-                        <div class="event-title">Tashqi delegatsiya</div>
+                        <div class="event-title">Delegatsiya</div>
                         <div class="event-meta">Ertaga • 10:30</div>
                     </div>
                     <div class="event-amount">5 mehmon</div>
@@ -91,11 +91,11 @@
         <div class="card-block">
             <div class="card-header">
                 <h2>Avto transportlar</h2>
-                <a href="{{ url_for('vehicles_list') }}" class="card-link">Barchasi →</a>
+                <a href="#" class="card-link">Barchasi →</a>
             </div>
             <div class="vehicle-list">
                 {% for v in vehicles[:4] %}
-                <div class="vehicle-row" onclick="window.location='{{ url_for('vehicles_detail', vehicle_id=v.id) }}'">
+                <div class="vehicle-row">
                     <div class="vehicle-img-placeholder">🚗</div>
                     <div class="vehicle-main">
                         <div class="vehicle-title">{{ v.plate_number }} – {{ v.model }}</div>
@@ -115,7 +115,7 @@
         <div class="card-block">
             <div class="card-header">
                 <h2>Outsorsing xizmatlari</h2>
-                <a href="{{ url_for('outsourcing_panel') }}" class="card-link">Barchasi →</a>
+                <a href="#" class="card-link">Barchasi →</a>
             </div>
             <div class="outsourcing-list">
                 {% if outsourcing_companies %}
@@ -141,7 +141,7 @@
         <div class="card-block">
             <div class="card-header">
                 <h2>Shartnomalar</h2>
-                <a href="{{ url_for('contracts_list') }}" class="card-link">Batafsil →</a>
+                <a href="#" class="card-link">Batafsil →</a>
             </div>
             <table class="table compact-table">
                 <thead>
@@ -163,8 +163,8 @@
 
         <div class="card-block">
             <div class="card-header">
-                <h2>Xodim topshiriqlari &amp; kunlik faollik</h2>
-                <a href="{{ url_for('hr_panel') }}" class="card-link">Xodimlar →</a>
+                <h2>Xodim topshiriqlari &amp; faollik</h2>
+                <a href="#" class="card-link">Xodimlar →</a>
             </div>
             <div class="employee-stats">
                 <div class="employee-number">
@@ -181,7 +181,7 @@
             </div>
             <div class="employee-curve-info">
                 <div class="curve-title">Oxirgi 7 kun faolligi</div>
-                <div class="curve-sub">Keyinchalik bu joyga real grafik qo'shish mumkin.</div>
+                <div class="curve-sub">Keyinchalik bu joyga real grafik qo'shamiz.</div>
             </div>
         </div>
     </div>
