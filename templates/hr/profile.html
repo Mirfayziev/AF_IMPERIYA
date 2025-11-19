@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block header_title %}Xodim profili{% endblock %}
+{% block content %}
+
+<div class="page-title">
+    <h1>{{ user.full_name }}</h1>
+    <p class="subtitle">Xodimning personal ma’lumotlari</p>
+</div>
+
+<div class="grid-main">
+
+  <!-- CHAP QISM — XODIM PROFIL KARTASI -->
+  <div class="column">
+    <div class="card-block">
+
+      <div class="profile-photo-wrap">
+        {% if user.photo %}
+        <img src="{{ url_for('static', filename='uploads/' ~ user.photo) }}" class="profile-photo">
+        {% else %}
+        <img src="{{ url_for('static', filename='img/default_user.png') }}" class="profile-photo">
+        {% endif %}
+      </div>
+
+      <ul class="list profile-list">
+        <li><b>F.I.Sh:</b> {{ user.full_name }}</li>
+        <li><b>Lavozim:</b> {{ user.position }}</li>
+        <li><b>Telefon:</b> {{ user.phone }}</li>
+        <li><b>Manzil:</b> {{ user.address }}</li>
+        <li><b>Tug‘ilgan sana:</b> {{ user.birth_date }}</li>
+      </ul>
+
+      {% if session.get("user_role") in ["admin","manager"] %}
+      <a class="btn btn-primary" href="/hr/edit/{{ user.id }}">Tahrirlash</a>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <!-- O‘NG QISM — PASSPORT, DIPLOM, HUJJATLAR -->
+  <div class="column">
+
+    <div class="card-block">
+      <h2>Passport ma'lumotlari</h2>
+      <ul class="list">
+        <li><b>Seriya:</b> {{ user.passport_series }}</li>
+        <li><b>Raqam:</b> {{ user.passport_number }}</li>
+        <li><b>Berilgan sana:</b> {{ user.passport_given_date }}</li>
+        <li><b>Berilgan joy:</b> {{ user.passport_given_by }}</li>
+      </ul>
+    </div>
+
+    <div class="card-block">
+      <h2>Diplom / Sertifikatlar</h2>
+      <ul class="list">
+        <li><b>Diplom turi:</b> {{ user.diploma_type }}</li>
+        <li><b>Muassasa:</b> {{ user.diploma_from }}</li>
+        <li><b>Bitirgan yil:</b> {{ user.diploma_year }}</li>
+      </ul>
+    </div>
+
+    <div class="card-block">
+      <h2>Yuklangan fayllar</h2>
+
+      {% if user.docs %}
+        {% for file in user.docs %}
+          <div class="doc-item">
+            <a href="{{ url_for('static', filename='uploads/' ~ file.filename) }}" target="_blank">{{ file.filename }}</a>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-text">Hujjatlar yuklanmagan.</div>
+      {% endif %}
+
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+.profile-photo-wrap{
+    text-align:center;
+    margin-bottom:15px;
+}
+.profile-photo{
+    width:140px; height:140px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #4b6bff;
+}
+.profile-list li{ margin-bottom:6px; }
+.doc-item{
+    padding:8px; background:#1c1f2b;
+    border-radius:8px; margin-bottom:8px;
+    border:1px solid #2e3448;
+}
+</style>
+
+{% endblock %}
