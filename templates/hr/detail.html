@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block page_title %}{{ user.username }}{% endblock %}
+{% block header_title %}Xodim ma'lumotlari{% endblock %}
+{% block content %}
+
+<div class="card-block">
+  <h2>{{ profile.full_name or user.username }}</h2>
+  <ul class="list">
+    <li><b>Pasport:</b> {{ profile.passport_info or "—" }}</li>
+    <li><b>Diplom:</b> {{ profile.diploma_info or "—" }}</li>
+    <li><b>Boshqa ma'lumotlar:</b> {{ profile.other_docs or "—" }}</li>
+  </ul>
+
+  <h3>Fayllar:</h3>
+  <ul class="list">
+    <li>
+      Pasport: 
+      {% if profile.passport_file %}
+        <a href="{{ url_for('static', filename='uploads/' ~ profile.passport_file) }}" target="_blank">Ko‘rish</a>
+      {% else %} — {% endif %}
+    </li>
+
+    <li>
+      Diplom: 
+      {% if profile.diploma_file %}
+        <a href="{{ url_for('static', filename='uploads/' ~ profile.diploma_file) }}" target="_blank">Ko‘rish</a>
+      {% else %} — {% endif %}
+    </li>
+
+    <li>
+      Boshqa fayl: 
+      {% if profile.other_file %}
+        <a href="{{ url_for('static', filename='uploads/' ~ profile.other_file) }}" target="_blank">Ko‘rish</a>
+      {% else %} — {% endif %}
+    </li>
+  </ul>
+</div>
+
+{% endblock %}
