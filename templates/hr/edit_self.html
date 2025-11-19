@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block page_title %}Mening profilim{% endblock %}
+{% block header_title %}Mening profilim{% endblock %}
+{% block content %}
+
+<div class="card-block">
+
+  <form method="post" enctype="multipart/form-data" class="form">
+    <label>Ism familya:
+      <input type="text" name="full_name" value="{{ profile.full_name or '' }}" required>
+    </label>
+
+    <label>Pasport ma’lumoti:
+      <input type="text" name="passport_info" value="{{ profile.passport_info or '' }}">
+    </label>
+
+    <label>Diplom ma’lumoti:
+      <input type="text" name="diploma_info" value="{{ profile.diploma_info or '' }}">
+    </label>
+
+    <label>Qo‘shimcha ma’lumotlar:
+      <textarea name="other_docs">{{ profile.other_docs or '' }}</textarea>
+    </label>
+
+    <label>Pasport fayli:
+      <input type="file" name="passport_file">
+      {% if profile.passport_file %}
+        <small>Yuklangan: {{ profile.passport_file }}</small>
+      {% endif %}
+    </label>
+
+    <label>Diplom fayli:
+      <input type="file" name="diploma_file">
+      {% if profile.diploma_file %}
+        <small>Yuklangan: {{ profile.diploma_file }}</small>
+      {% endif %}
+    </label>
+
+    <label>Boshqa fayl:
+      <input type="file" name="other_file">
+      {% if profile.other_file %}
+        <small>Yuklangan: {{ profile.other_file }}</small>
+      {% endif %}
+    </label>
+
+    <button type="submit" class="btn-primary">Saqlash</button>
+  </form>
+
+</div>
+
+{% endblock %}
