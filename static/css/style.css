@@ -131,8 +131,9 @@ body {
     margin-bottom: 6px;
 }
 .flash-success { background: #d1fae5; color: #065f46; }
-.flash-danger { background: #fee2e2; color: #b91c1c; }
-.flash-info { background: #dbeafe; color: #1d4ed8; }
+.flash-danger  { background: #fee2e2; color: #b91c1c; }
+.flash-info    { background: #dbeafe; color: #1d4ed8; }
+
 .dashboard-content {
     padding: 6px 4px 10px;
 }
@@ -172,6 +173,7 @@ body {
 .stat-card.red    { border-top: 3px solid #ef4444; }
 .stat-card.blue   { border-top: 3px solid #3b82f6; }
 .stat-card.mint   { border-top: 3px solid #0ea5e9; }
+
 .grid-main {
     display: grid;
     grid-template-columns: 1.3fr 1.2fr 1.2fr;
@@ -233,11 +235,13 @@ body {
 .status-in_progress{ background:#dbeafe; color:#1d4ed8; }
 .status-done       { background:#dcfce7; color:#15803d; }
 .status-rejected   { background:#fee2e2; color:#b91c1c; }
+
 .empty-text {
     font-size: 12px;
     color: #9ca3af;
     margin-top: 6px;
 }
+
 .event-list {
     display: flex;
     flex-direction: column;
@@ -264,6 +268,7 @@ body {
     font-weight: 600;
     color: #111827;
 }
+
 .vehicle-list {
     display: flex;
     flex-direction: column;
@@ -276,7 +281,6 @@ body {
     padding: 8px 10px;
     border-radius: 14px;
     background: #f9fafb;
-    cursor: pointer;
 }
 .vehicle-row:hover {
     background: #eef2ff;
@@ -290,12 +294,6 @@ body {
     align-items:center;
     justify-content:center;
     color:white;
-}
-.vehicle-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 12px;
 }
 .vehicle-main {
     flex: 1;
@@ -315,24 +313,7 @@ body {
     background: #e0f2fe;
     color:#0369a1;
 }
-.table {
-    width:100%;
-    border-collapse:collapse;
-}
-.table th, .table td {
-    padding:8px 6px;
-    border-bottom:1px solid #e5e7eb;
-    font-size:12px;
-}
-.table th {
-    text-align:left;
-    color:#6b7280;
-    font-weight:500;
-}
-.compact-table tr:hover {
-    background:#f3f4ff;
-    cursor:pointer;
-}
+
 .employee-stats {
     display:flex;
     align-items:flex-end;
@@ -374,6 +355,9 @@ body {
 .employee-curve-info .curve-sub {
     color:#6b7280;
 }
+
+/* login */
+
 .login-body {
     background: radial-gradient(circle at top, #1d4ed8, #020617);
     min-height: 100vh;
@@ -444,21 +428,4 @@ body {
     margin-top:12px;
     font-size:11px;
     color:#9ca3af;
-}
-.list {
-    list-style:none;
-    padding-left:0;
-}
-.form label {
-    display:block;
-    font-size:13px;
-    margin-bottom:8px;
-}
-.form input, .form select, .form textarea {
-    width:100%;
-    padding:7px 9px;
-    border-radius:8px;
-    border:1px solid #d1d5db;
-    font-size:13px;
-    margin-top:3px;
 }
