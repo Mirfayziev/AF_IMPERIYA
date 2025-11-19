@@ -13,7 +13,7 @@
             <img src="{{ url_for('static', filename='img/logo_af.png') }}" alt="AF Logo">
         </div>
         <h1 class="login-title">AI Imperiya</h1>
-        <p class="login-sub">Rahbar va xodimlar uchun yagona boshqaruv platformasi</p>
+        <p class="login-sub">Rahbar va xodimlar uchun boshqaruv paneli</p>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -34,7 +34,7 @@
         </form>
 
         <div class="login-demo">
-            Demo foydalanuvchilar:<br>
+            Demo loginlar:<br>
             <code>manager / manager123</code><br>
             <code>admin / admin123</code><br>
             <code>employee / employee123</code>
