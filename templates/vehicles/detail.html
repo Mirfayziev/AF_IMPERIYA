@@ -2,14 +2,25 @@
 {% block page_title %}Transport{% endblock %}
 {% block header_title %}Transport ma'lumotlari{% endblock %}
 {% block content %}
-<div class="card-block">
-  <h2>{{ v.plate_number }} – {{ v.model }}</h2>
-  <ul class="list">
-    <li><b>Haydovchi:</b> {{ v.driver_full_name or "Biriktirilmagan" }}</li>
-    <li><b>Oylik limit:</b> {{ v.monthly_fuel_limit }} L</li>
-    <li><b>Oxirgi remont:</b> {{ v.last_repair_date or "—" }}</li>
-    <li><b>Holati:</b> {{ v.last_repair_status or "—" }}</li>
-    <li><b>Tizim tashkiloti:</b> {{ v.organization.name if v.organization else "Belgilanishi kerak" }}</li>
-  </ul>
+<div class="grid-main">
+  <div class="column">
+    <div class="card-block">
+      <h2>{{ v.plate_number }} – {{ v.model }}</h2>
+      <div class="vehicle-img-big">
+        {% if v.image_path %}
+          <img src="{{ url_for('static', filename='uploads/' ~ v.image_path) }}">
+        {% else %}
+          🚗
+        {% endif %}
+      </div>
+      <ul class="list">
+        <li><b>Haydovchi:</b> {{ v.driver_full_name or "Biriktirilmagan" }}</li>
+        <li><b>Oylik limit:</b> {{ v.monthly_fuel_limit }} L</li>
+        <li><b>Oxirgi remont:</b> {{ v.last_repair_date or "—" }}</li>
+        <li><b>Holati:</b> {{ v.last_repair_status or "—" }}</li>
+        <li><b>Tizim tashkiloti:</b> {{ v.organization.name if v.organization else "Belgilanishi kerak" }}</li>
+      </ul>
+    </div>
+  </div>
 </div>
 {% endblock %}

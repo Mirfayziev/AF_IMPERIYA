@@ -1,24 +1,8 @@
-{% extends "base.html" %}
-{% block page_title %}Outsorsing{% endblock %}
-{% block header_title %}Outsorsing xizmatlari{% endblock %}
+{% extends 'base.html' %}
+{% block header_title %}Outsorsing{% endblock %}
 {% block content %}
 <div class="card-block">
-  <div class="card-header">
-    <h2>Outsorsing tashkilotlari</h2>
-    <a href="{{ url_for('outsourcing_create') }}" class="card-link">+ Yangi tashkilot</a>
-  </div>
-  <div class="outsourcing-list">
-    {% for c in companies %}
-    <div class="outsourcing-row">
-      <div>
-        <div class="outsourcing-title">{{ c.name }}</div>
-        <div class="outsourcing-meta">{{ c.service_type }}</div>
-      </div>
-      <div class="outsourcing-amount">{{ '%.1f'|format(c.contract_amount or 0) }} $</div>
-    </div>
-    {% else %}
-    <div class="empty-text">Outsorsing tashkilotlari kiritilmagan.</div>
-    {% endfor %}
-  </div>
+  <h2>Outsorsing tashkilotlar</h2>
+  <p>Keyinchalik bu yerda to'liq ro'yxat, xodimlar va shartnomalar ko'rinadi.</p>
 </div>
 {% endblock %}

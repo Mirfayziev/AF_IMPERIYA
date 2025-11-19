@@ -3,24 +3,16 @@
 {% block header_title %}{{ org.name }}{% endblock %}
 {% block content %}
 <div class="grid-main">
-  <div class="card-block">
-    <h2>{{ org.name }}</h2>
-    <ul class="list">
-      <li><b>Xodimlar soni:</b> {{ org.employee_count }}</li>
-      <li><b>Manzil:</b> {{ org.address or '—' }}</li>
-      <li><b>Qavati:</b> {{ org.floor or '—' }}</li>
-      <li><b>Izoh:</b> {{ org.comment or '—' }}</li>
-    </ul>
-  </div>
-  <div class="card-block">
-    <h2>Biriktirilgan transportlar</h2>
-    <ul class="list">
-      {% for v in vehicles %}
-      <li>{{ v.plate_number }} – {{ v.model }} ({{ v.driver_full_name or 'haydovchi yo\'q' }})</li>
-      {% else %}
-      <li class="empty-text">Bu tashkilotga transport biriktirilmagan.</li>
-      {% endfor %}
-    </ul>
+  <div class="column">
+    <div class="card-block">
+      <h2>{{ org.name }}</h2>
+      <ul class="list">
+        <li><b>Xodimlar soni:</b> {{ org.employee_count }}</li>
+        <li><b>Manzil:</b> {{ org.address or '—' }}</li>
+        <li><b>Qavati:</b> {{ org.floor or '—' }}</li>
+        <li><b>Izoh:</b> {{ org.comment or '—' }}</li>
+      </ul>
+    </div>
   </div>
 </div>
 {% endblock %}

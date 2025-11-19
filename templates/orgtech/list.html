@@ -1,29 +1,8 @@
-{% extends "base.html" %}
-{% block page_title %}Orgtexnika{% endblock %}
-{% block header_title %}Orgtexnika ro'yxati{% endblock %}
+{% extends 'base.html' %}
+{% block header_title %}Orgtexnika{% endblock %}
 {% block content %}
 <div class="card-block">
-  <div class="card-header">
-    <h2>Orgtexnika</h2>
-    <a href="{{ url_for('orgtech_create') }}" class="card-link">+ Yangi qurilma</a>
-  </div>
-  <table class="table compact-table">
-    <thead>
-      <tr><th>Nomi</th><th>Model</th><th>Serial</th><th>Holati</th><th>Xodim</th></tr>
-    </thead>
-    <tbody>
-      {% for d in devices %}
-      <tr>
-        <td>{{ d.name }}</td>
-        <td>{{ d.model }}</td>
-        <td>{{ d.serial_number }}</td>
-        <td>{{ d.status }}</td>
-        <td>{{ d.assigned_to.username if d.assigned_to else '' }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="5" class="empty-text">Orgtexnika kiritilmagan.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <h2>Orgtexnika</h2>
+  <p>Keyinchalik bu yerda qurilmalar ro'yxati va ularning holati ko'rinadi.</p>
 </div>
 {% endblock %}

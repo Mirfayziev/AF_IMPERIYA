@@ -1,33 +1,33 @@
 {% extends "base.html" %}
-{% block page_title %}Yangi transport{% endblock %}
+{% block page_title %}Transport qo'shish{% endblock %}
 {% block header_title %}Yangi transport qo'shish{% endblock %}
 {% block content %}
 <div class="card-block">
-  <form method="post" class="form">
-    <label>Davlat raqami
+  <form method="post" enctype="multipart/form-data" class="form">
+    <label>Davlat raqami:
       <input type="text" name="plate_number" required>
     </label>
-    <label>Modeli
+    <label>Modeli:
       <input type="text" name="model" required>
     </label>
-    <label>Haydovchi F.I.Sh
+    <label>Haydovchi F.I.Sh (ixtiyoriy):
       <input type="text" name="driver_full_name">
     </label>
-    <label>Oylik benzin limiti (L)
-      <input type="number" name="monthly_fuel_limit" min="0" step="0.1">
+    <label>Oylik benzin limiti (L):
+      <input type="number" name="monthly_fuel_limit" required>
     </label>
-    <label>Oxirgi remont holati
-      <input type="text" name="last_repair_status">
+    <label>Rasm yuklash:
+      <input type="file" name="image">
     </label>
-    <label>Tizim tashkiloti
+    <label>Tizim tashkiloti:
       <select name="organization_id">
-        <option value="">Tanlanmagan</option>
+        <option value="">Tashkilot tanlanmagan</option>
         {% for o in orgs %}
         <option value="{{ o.id }}">{{ o.name }}</option>
         {% endfor %}
       </select>
     </label>
-    <button type="submit" class="btn-link">Saqlash</button>
+    <button type="submit" class="btn-primary">Saqlash</button>
   </form>
 </div>
 {% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block header_title %}Xodimlar nazorati{% endblock %}
+{% block content %}
+<div class="card-block">
+  <h2>Xodimlar</h2>
+  <ul class="list">
+    {% for e in employees %}
+      <li>{{ e.username }}</li>
+    {% else %}
+      <li class="empty-text">Xodimlar yo'q.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

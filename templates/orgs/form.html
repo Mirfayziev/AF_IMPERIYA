@@ -1,25 +1,25 @@
 {% extends "base.html" %}
-{% block page_title %}Tizim tashkiloti{% endblock %}
-{% block header_title %}Tizim tashkiloti qo'shish{% endblock %}
+{% block page_title %}Tizim tashkiloti formasi{% endblock %}
+{% block header_title %}Tizim tashkiloti{% endblock %}
 {% block content %}
 <div class="card-block">
   <form method="post" class="form">
     <label>Tashkilot nomi
-      <input type="text" name="name" required>
+      <input type="text" name="name" value="{{ org.name if org else '' }}" required>
     </label>
     <label>Xodimlar soni
-      <input type="number" name="employee_count" min="0" step="1">
+      <input type="number" name="employee_count" value="{{ org.employee_count if org else 0 }}">
     </label>
     <label>Manzil
-      <input type="text" name="address">
+      <input type="text" name="address" value="{{ org.address if org else '' }}">
     </label>
     <label>Qavati
-      <input type="text" name="floor">
+      <input type="text" name="floor" value="{{ org.floor if org else '' }}" placeholder="Masalan: 3-qavat, 2-bino">
     </label>
-    <label>Izoh
-      <textarea name="comment" rows="3"></textarea>
+    <label>Qo'shimcha izoh
+      <textarea name="comment" rows="3">{{ org.comment if org else '' }}</textarea>
     </label>
-    <button type="submit" class="btn-link">Saqlash</button>
+    <button type="submit" class="btn-primary">Saqlash</button>
   </form>
 </div>
 {% endblock %}

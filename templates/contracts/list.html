@@ -1,20 +1,21 @@
-{% extends "base.html" %}
-{% block page_title %}Shartnomalar{% endblock %}
+{% extends 'base.html' %}
 {% block header_title %}Shartnomalar{% endblock %}
 {% block content %}
 <div class="card-block">
-  <table class="table compact-table">
-    <thead><tr><th>Nomi</th><th>Summasi</th><th>Holati</th><th>Sana</th></tr></thead>
+  <h2>Shartnomalar</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Nom</th><th>Summasi</th><th>Holati</th></tr>
+    </thead>
     <tbody>
       {% for c in contracts %}
       <tr>
         <td>{{ c.title }}</td>
-        <td>{{ '%.1f'|format(c.amount or 0) }}</td>
+        <td>{{ c.amount }}</td>
         <td>{{ c.status }}</td>
-        <td>{{ c.created_at.date() }}</td>
       </tr>
       {% else %}
-      <tr><td colspan="4" class="empty-text">Shartnomalar yo'q.</td></tr>
+      <tr><td colspan="3" class="empty-text">Shartnomalar yo'q.</td></tr>
       {% endfor %}
     </tbody>
   </table>

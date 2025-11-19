@@ -7,78 +7,75 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+
 <div class="app-shell">
-    <!-- Sidebar -->
+
     <aside class="sidebar">
-        <div class="sidebar-logo">
-            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="AF Logo">
-            <div class="sidebar-logo-text">AF Imperiya</div>
+        <div class="sidebar-top">
+            <div class="logo-wrap">
+                <img src="{{ url_for('static', filename='img/logo_af.png') }}" class="logo-img" alt="AF logo">
+            </div>
+            <div class="user-info">
+                <div class="user-name">AI Imperiya</div>
+                <div class="user-role">
+                    {% if session.get('user_role') == 'manager' %}Rahbar paneli{% elif session.get('user_role') == 'admin' %}Admin paneli{% else %}Xodim paneli{% endif %}
+                </div>
+            </div>
         </div>
+
         <nav class="sidebar-menu">
-            {% if session.get('user_role') == 'manager' %}
-                <a href="{{ url_for('manager_dashboard') }}" class="menu-item">
-                    <span class="menu-icon">📊</span><span class="menu-text">Rahbar paneli</span>
-                </a>
-                <a href="{{ url_for('orgs_list') }}" class="menu-item">
-                    <span class="menu-icon">🏢</span><span class="menu-text">Tizim tashkilotlar</span>
-                </a>
-                <a href="{{ url_for('vehicles_list') }}" class="menu-item">
-                    <span class="menu-icon">🚗</span><span class="menu-text">Avtotransportlar</span>
-                </a>
-                <a href="{{ url_for('outsourcing_list') }}" class="menu-item">
-                    <span class="menu-icon">🤝</span><span class="menu-text">Outsorsing</span>
-                </a>
-                <a href="{{ url_for('orgtech_list') }}" class="menu-item">
-                    <span class="menu-icon">🖨</span><span class="menu-text">Orgtexnika</span>
-                </a>
-                <a href="{{ url_for('contracts_list') }}" class="menu-item">
-                    <span class="menu-icon">📄</span><span class="menu-text">Shartnomalar</span>
-                </a>
-                <a href="{{ url_for('ijro_list') }}" class="menu-item">
-                    <span class="menu-icon">📆</span><span class="menu-text">Ijro kalendari</span>
-                </a>
-                <a href="{{ url_for('hr_users') }}" class="menu-item">
-                    <span class="menu-icon">👥</span><span class="menu-text">Xodimlar</span>
-                </a>
-                <a href="{{ url_for('solar_dashboard') }}" class="menu-item">
-                    <span class="menu-icon">☀</span><span class="menu-text">Solar</span>
-                </a>
-            {% elif session.get('user_role') == 'admin' %}
-                <a href="{{ url_for('admin_dashboard') }}" class="menu-item">
-                    <span class="menu-icon">🛠</span><span class="menu-text">Admin paneli</span>
-                </a>
-                <a href="{{ url_for('hr_users') }}" class="menu-item">
-                    <span class="menu-icon">👥</span><span class="menu-text">Foydalanuvchilar</span>
-                </a>
-            {% elif session.get('user_role') == 'employee' %}
-                <a href="{{ url_for('employee_dashboard') }}" class="menu-item">
-                    <span class="menu-icon">🧑‍💻</span><span class="menu-text">Xodim paneli</span>
-                </a>
-                <a href="{{ url_for('ijro_list') }}" class="menu-item">
-                    <span class="menu-icon">📆</span><span class="menu-text">Ijro topshiriqlari</span>
-                </a>
-            {% endif %}
+            <a href="{{ url_for('manager_dashboard') }}" class="menu-item{% if request.endpoint=='manager_dashboard' %} active{% endif %}">
+                <span class="menu-icon">📊</span><span class="menu-text">Topsheriklar</span>
+            </a>
+            <a href="{{ url_for('vehicles_list') }}" class="menu-item{% if request.endpoint.startswith('vehicles_') or request.endpoint=='vehicles_list' %} active{% endif %}">
+                <span class="menu-icon">🚗</span><span class="menu-text">Avtotransportlar</span>
+            </a>
+            <a href="{{ url_for('contracts_list') }}" class="menu-item{% if request.endpoint=='contracts_list' %} active{% endif %}">
+                <span class="menu-icon">📄</span><span class="menu-text">Shartnomalar</span>
+            </a>
+            <a href="{{ url_for('outsourcing_panel') }}" class="menu-item{% if request.endpoint=='outsourcing_panel' %} active{% endif %}">
+                <span class="menu-icon">🤝</span><span class="menu-text">Outsorsing</span>
+            </a>
+            <a href="{{ url_for('orgtech_panel') }}" class="menu-item{% if request.endpoint=='orgtech_panel' %} active{% endif %}">
+                <span class="menu-icon">🖨</span><span class="menu-text">Orgtexnika</span>
+            </a>
+            <a href="{{ url_for('orgs_list') }}" class="menu-item{% if request.endpoint.startswith('orgs_') %} active{% endif %}">
+                <span class="menu-icon">🏢</span><span class="menu-text">Tizim tashkilotlar</span>
+            </a>
+            <a href="{{ url_for('solar_panel') }}" class="menu-item{% if request.endpoint=='solar_panel' %} active{% endif %}">
+                <span class="menu-icon">☀</span><span class="menu-text">Solar</span>
+            </a>
+            <a href="{{ url_for('ijro_panel') }}" class="menu-item{% if request.endpoint=='ijro_panel' %} active{% endif %}">
+                <span class="menu-icon">📅</span><span class="menu-text">Ijro</span>
+            </a>
+            <a href="{{ url_for('hr_panel') }}" class="menu-item{% if request.endpoint=='hr_panel' %} active{% endif %}">
+                <span class="menu-icon">👥</span><span class="menu-text">Xodimlar</span>
+            </a>
         </nav>
+
         <div class="sidebar-bottom">
-            <a href="{{ url_for('logout') }}" class="menu-item">
-                <span class="menu-icon">🚪</span><span>Chiqish</span>
+            <a href="{{ url_for('logout') }}" class="menu-item logout">
+                <span class="menu-icon">🚪</span><span class="menu-text">Chiqish</span>
             </a>
         </div>
     </aside>
 
-    <!-- Main -->
     <main class="main-panel">
         <header class="topbar">
             <div class="topbar-left">
-                <h1 class="topbar-title">{% block header_title %}{% endblock %}</h1>
+                <h1 class="topbar-title">
+                    {% block header_title %}Panel{% endblock %}
+                </h1>
             </div>
             <div class="topbar-right">
                 <div class="search-box">
-                    <input type="text" placeholder="Qidirish...">
+                    <input type="text" placeholder="Qidirish..." />
                 </div>
                 <div class="topbar-user">
                     <div class="avatar-small">AF</div>
-                    <div class="topbar-user-name">{{ session.get('user_role')|capitalize if session.get('user_role') else '' }}</div>
+                    <div class="topbar-user-name">
+                        {% if session.get('user_role') == 'manager' %}Rahbar{% elif session.get('user_role') == 'admin' %}Admin{% else %}Xodim{% endif %}
+                    </div>
                 </div>
             </div>
         </header>
@@ -98,5 +95,6 @@
         </section>
     </main>
 </div>
+
 </body>
 </html>

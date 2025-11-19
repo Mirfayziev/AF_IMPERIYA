@@ -7,9 +7,11 @@
     <h2>Tizim tashkilotlar</h2>
     <a href="{{ url_for('orgs_create') }}" class="card-link">+ Yangi tashkilot</a>
   </div>
-  <table class="table compact-table">
+  <table class="table">
     <thead>
-      <tr><th>Nomi</th><th>Xodimlar</th><th>Manzil</th><th>Qavat</th></tr>
+      <tr>
+        <th>Nomi</th><th>Xodimlar soni</th><th>Manzil</th><th>Qavati</th>
+      </tr>
     </thead>
     <tbody>
       {% for o in orgs %}
@@ -20,7 +22,7 @@
         <td>{{ o.floor }}</td>
       </tr>
       {% else %}
-      <tr><td colspan="4" class="empty-text">Hali tashkilot kiritilmagan.</td></tr>
+      <tr><td colspan="4" class="empty-text">Tizim tashkilotlari kiritilmagan.</td></tr>
       {% endfor %}
     </tbody>
   </table>

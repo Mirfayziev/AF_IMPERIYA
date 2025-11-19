@@ -1,32 +1,32 @@
 {% extends "base.html" %}
 {% block page_title %}Rahbar paneli{% endblock %}
 {% block header_title %}Rahbar paneli{% endblock %}
-
 {% block content %}
+
 <div class="stats-row">
     <div class="stat-card orange">
-        <div class="stat-label">Tugatilgan topshiriqlar</div>
-        <div class="stat-value">{{ done_tasks or 0 }}</div>
-        <div class="stat-sub">Umumiy topshiriqlar: {{ tasks|length if tasks else 0 }}</div>
+        <div class="stat-label">Umumiy topshiriqlar</div>
+        <div class="stat-value">{{ tasks|length if tasks else 0 }}</div>
+        <div class="stat-sub">Yig'ilgan topshiriqlar</div>
     </div>
     <div class="stat-card green">
-        <div class="stat-label">Jarayondagi topshiriqlar</div>
+        <div class="stat-label">Bajarilgan</div>
+        <div class="stat-value">{{ done_tasks or 0 }}</div>
+        <div class="stat-sub">Yakunlanganlar</div>
+    </div>
+    <div class="stat-card blue">
+        <div class="stat-label">Jarayonda</div>
         <div class="stat-value">{{ in_progress or 0 }}</div>
         <div class="stat-sub">Faol jarayonlar</div>
     </div>
     <div class="stat-card red">
         <div class="stat-label">Yangi topshiriqlar</div>
         <div class="stat-value">{{ new_tasks or 0 }}</div>
-        <div class="stat-sub">Yangi kelib tushganlar</div>
-    </div>
-    <div class="stat-card blue">
-        <div class="stat-label">Bugungi reja</div>
-        <div class="stat-value">{{ tasks|length if tasks else 0 }}</div>
-        <div class="stat-sub">Bugungi kesimda</div>
+        <div class="stat-sub">Tasdiqlanishi kerak</div>
     </div>
     <div class="stat-card mint">
         <div class="stat-label">Shartnoma summasi</div>
-        <div class="stat-value">{{ '%.1f'|format(total_contract_amount or 0) }} $</div>
+        <div class="stat-value">{{ "%.1f"|format(total_contract_amount or 0) }} $</div>
         <div class="stat-sub">Aktiv shartnomalar</div>
     </div>
 </div>
@@ -36,22 +36,22 @@
         <div class="card-block">
             <div class="card-header">
                 <h2>Tushgan topshiriqlar</h2>
-                <a href="#" class="card-link">Barchasini ko‘rish →</a>
+                <a href="#" class="card-link">Barchasi →</a>
             </div>
             <div class="task-short-list">
-                {% for t in tasks[:5] %}
+                {% for t in tasks[:6] %}
                 <div class="task-row">
                     <div class="task-main">
                         <div class="task-title">{{ t.title }}</div>
                         <div class="task-meta">
                             <span>{{ t.assigned_to.username if t.assigned_to else "Ijrochi yo'q" }}</span>
-                            <span> • Muddat: {{ t.due_date or "belgilanmagan" }}</span>
+                            <span>• Muddat: {{ t.due_date or "belgilanmagan" }}</span>
                         </div>
                     </div>
                     <div class="task-status-pill status-{{ t.status }}">{{ t.status }}</div>
                 </div>
                 {% else %}
-                <div class="empty-text">Topshiriqlar hozircha yo‘q.</div>
+                <div class="empty-text">Topshiriqlar hozircha yo'q.</div>
                 {% endfor %}
             </div>
         </div>
@@ -64,7 +64,7 @@
             <div class="event-list">
                 <div class="event-row">
                     <div>
-                        <div class="event-title">Ichki yig‘ilish</div>
+                        <div class="event-title">Ichki yig'ilish</div>
                         <div class="event-meta">Bugun • 15:00</div>
                     </div>
                     <div class="event-amount">12 ishtirokchi</div>
@@ -78,7 +78,7 @@
                 </div>
                 <div class="event-row">
                     <div>
-                        <div class="event-title">O‘quv seminari</div>
+                        <div class="event-title">O'quv seminari</div>
                         <div class="event-meta">Juma • 09:00</div>
                     </div>
                     <div class="event-amount">24 xodim</div>
@@ -103,11 +103,11 @@
                         <div class="vehicle-meta">Limit: {{ v.monthly_fuel_limit or 0 }} L</div>
                     </div>
                     <div class="vehicle-side">
-                        <div class="vehicle-badge">{{ v.organization.name if v.organization else "Tashkilot yo‘q" }}</div>
+                        <div class="vehicle-badge">{{ v.organization.name if v.organization else "Tizim tashk. yo'q" }}</div>
                     </div>
                 </div>
                 {% else %}
-                <div class="empty-text">Transportlar kiritilmagan.</div>
+                <div class="empty-text">Transportlar hozircha kiritilmagan.</div>
                 {% endfor %}
             </div>
         </div>
@@ -115,21 +115,23 @@
         <div class="card-block">
             <div class="card-header">
                 <h2>Outsorsing xizmatlari</h2>
-                <a href="{{ url_for('outsourcing_list') }}" class="card-link">Barchasi →</a>
+                <a href="{{ url_for('outsourcing_panel') }}" class="card-link">Barchasi →</a>
             </div>
             <div class="outsourcing-list">
                 {% if outsourcing_companies %}
-                    {% for c in outsourcing_companies[:3] %}
+                    {% for c in outsourcing_companies %}
                     <div class="outsourcing-row">
-                        <div>
+                        <div class="outsourcing-main">
                             <div class="outsourcing-title">{{ c.name }}</div>
-                            <div class="outsourcing-meta">{{ c.service_type or "Xizmat turi yo‘q" }}</div>
+                            <div class="outsourcing-meta">{{ c.service_type or "Xizmat turi" }}</div>
                         </div>
-                        <div class="outsourcing-amount">{{ '%.1f'|format(c.contract_amount or 0) }} $</div>
+                        <div class="outsourcing-side">
+                            <div class="outsourcing-amount">{{ "%.1f"|format(c.contract_amount or 0) }} $</div>
+                        </div>
                     </div>
                     {% endfor %}
                 {% else %}
-                <div class="empty-text">Outsorsing tashkilotlari yo‘q.</div>
+                    <div class="empty-text">Outsorsing tashkilotlari kiritilmagan.</div>
                 {% endif %}
             </div>
         </div>
@@ -146,15 +148,15 @@
                     <tr><th>Nom</th><th>Summasi</th><th>Holati</th></tr>
                 </thead>
                 <tbody>
-                    {% for c in contracts[:5] %}
+                    {% for c in contracts %}
                     <tr>
                         <td>{{ c.title }}</td>
-                        <td>{{ '%.1f'|format(c.amount or 0) }}</td>
-                        <td>{{ c.status or '—' }}</td>
+                        <td>{{ "%.1f"|format(c.amount or 0) }}</td>
+                        <td>{{ c.status or "—" }}</td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="3" class="empty-text">Shartnomalar hozircha yo‘q.</td></tr>
-                    {% endif %}
+                    <tr><td colspan="3" class="empty-text">Shartnomalar yo'q.</td></tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -162,7 +164,7 @@
         <div class="card-block">
             <div class="card-header">
                 <h2>Xodim topshiriqlari &amp; kunlik faollik</h2>
-                <a href="{{ url_for('hr_users') }}" class="card-link">Xodimlar →</a>
+                <a href="{{ url_for('hr_panel') }}" class="card-link">Xodimlar →</a>
             </div>
             <div class="employee-stats">
                 <div class="employee-number">
@@ -170,18 +172,19 @@
                     <div class="employee-value">{{ active_employees or 0 }}</div>
                 </div>
                 <div class="employee-mini-chart">
-                    <div class="mini-bar" style="height:60%;"></div>
-                    <div class="mini-bar" style="height:80%;"></div>
-                    <div class="mini-bar" style="height:40%;"></div>
-                    <div class="mini-bar" style="height:90%;"></div>
-                    <div class="mini-bar" style="height:50%;"></div>
+                    <div class="mini-bar" style="height: 60%;"></div>
+                    <div class="mini-bar" style="height: 80%;"></div>
+                    <div class="mini-bar" style="height: 40%;"></div>
+                    <div class="mini-bar" style="height: 90%;"></div>
+                    <div class="mini-bar" style="height: 50%;"></div>
                 </div>
             </div>
             <div class="employee-curve-info">
                 <div class="curve-title">Oxirgi 7 kun faolligi</div>
-                <div class="curve-sub">Keyinchalik bu joyga real grafik qo‘shish mumkin.</div>
+                <div class="curve-sub">Keyinchalik bu joyga real grafik qo'shish mumkin.</div>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}

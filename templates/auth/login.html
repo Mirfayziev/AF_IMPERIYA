@@ -2,17 +2,18 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>Kirish – AF Imperiya</title>
+    <title>AI Imperiya – Kirish</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-<div class="login-page">
+<body class="login-body">
+<div class="login-wrapper">
     <div class="login-card">
         <div class="login-logo">
-            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="AF Logo">
+            <img src="{{ url_for('static', filename='img/logo_af.png') }}" alt="AF Logo">
         </div>
-        <div class="login-title">AF Imperiya – Kirish</div>
+        <h1 class="login-title">AI Imperiya</h1>
+        <p class="login-sub">Rahbar va xodimlar uchun yagona boshqaruv platformasi</p>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -22,15 +23,22 @@
         {% endif %}
         {% endwith %}
 
-        <form method="post" class="form">
+        <form method="post" class="login-form">
             <label>Login
                 <input type="text" name="username" required>
             </label>
             <label>Parol
                 <input type="password" name="password" required>
             </label>
-            <button type="submit" class="btn-link">Kirish</button>
+            <button type="submit" class="btn-primary">Kirish</button>
         </form>
+
+        <div class="login-demo">
+            Demo foydalanuvchilar:<br>
+            <code>manager / manager123</code><br>
+            <code>admin / admin123</code><br>
+            <code>employee / employee123</code>
+        </div>
     </div>
 </div>
 </body>
