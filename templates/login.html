@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Imperiya – Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #111827, #1e1b4b, #0f172a);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            color: #fff;
+        }
+
+        .login-card {
+            width: 360px;
+            padding: 30px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 0 35px rgba(0,0,0,0.3);
+            animation: fadeIn 0.6s ease;
+        }
+
+        .logo-wrap {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo-wrap img {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+        }
+
+        .logo-title {
+            font-size: 22px;
+            margin-top: 10px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 19px;
+            opacity: 0.9;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 14px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.08);
+            font-size: 14px;
+        }
+
+        .login-card input:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #4f46e5;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #6366f1;
+        }
+
+        .footer-text {
+            text-align: center;
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 15px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo-wrap">
+            <img src="{{ url_for('static', filename='img/af_logo.png') }}" alt="Logo">
+            <div class="logo-title">AI IMPERIYA</div>
+        </div>
+
+        <h2>Tizimga kirish</h2>
+
+        <form action="/login" method="post">
+            <input type="text" name="username" placeholder="Login" required>
+            <input type="password" name="password" placeholder="Parol" required>
+            <button class="btn-login" type="submit">Kirish</button>
+        </form>
+
+        <div class="footer-text">
+            © {{ now.year if now else "2025" }} AF Imperiya. Barcha huquqlar himoyalangan.
+        </div>
+    </div>
+
+</body>
+</html>
