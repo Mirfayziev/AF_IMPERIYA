@@ -1,165 +1,320 @@
-from datetime import datetime, date
-from flask_sqlalchemy import SQLAlchemy
+{% extends "base.html" %}
+{% block content %}
 
-db = SQLAlchemy()
+<div class="calendar-page">
 
-# ---------------- USER ---------------- #
+  <div class="calendar-header-row">
+    <div>
+      <h1>Ijro kalendari</h1>
+      <p class="subtitle">Muddatli topshiriqlar kunlar bo‘yicha</p>
+    </div>
+    <div class="cal-legend">
+      <span class="dot has-task"></span> Topshiriq bor kun
+      <span class="dot today-dot"></span> Bugungi kun
+    </div>
+  </div>
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(32), nullable=False, default="employee")  # admin / manager / employee
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+  <div class="calendar-header">
+      <button onclick="prevMonth()" class="month-btn">◀</button>
+      <span id="monthYear" class="month-label"></span>
+      <button onclick="nextMonth()" class="month-btn">▶</button>
+  </div>
 
-    def __repr__(self):
-        return f"<User {self.username}>"
+  <div class="weekday-row">
+    <div>Du</div>
+    <div>Se</div>
+    <div>Ch</div>
+    <div>Pa</div>
+    <div>Ju</div>
+    <div>Sh</div>
+    <div>Ya</div>
+  </div>
 
+  <div class="calendar-grid" id="calendarGrid"></div>
 
-# ---------------- TASK (TOPSHIRIQLAR) ---------------- #
+</div>
 
-class Task(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text)
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeModal()">×</span>
+    <h3 id="modalDateTitle">Topshiriqlar</h3>
+    <div id="modalTasks"></div>
+  </div>
+</div>
 
-    status = db.Column(db.String(32), default="new")        # new / in_progress / done / rejected
-    priority = db.Column(db.String(16), default="normal")   # normal / high / low
+<style>
+.calendar-page{
+    max-width: 980px;
+    margin: auto;
+    color:#fff;
+}
 
-    due_date = db.Column(db.Date)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+.calendar-header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+.calendar-header-row h1{
+    margin:0;
+    font-size:26px;
+}
+.subtitle{
+    font-size:13px;
+    opacity:0.7;
+    margin-top:3px;
+}
 
-    created_by_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    created_by = db.relationship("User", foreign_keys=[created_by_id])
+.cal-legend{
+    font-size:12px;
+    opacity:0.8;
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+.dot{
+    display:inline-block;
+    width:10px; height:10px;
+    border-radius:50%;
+    margin-right:4px;
+}
+.dot.has-task{ background:#4b6bff; }
+.dot.today-dot{ background:#22c55e; }
 
-    assigned_to_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    assigned_to = db.relationship("User", foreign_keys=[assigned_to_id])
+.calendar-header{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    margin-bottom:10px;
+}
+.month-btn{
+    background:#2e3448;
+    border:1px solid #3f4b63;
+    padding:6px 12px;
+    color:#fff;
+    border-radius:8px;
+    font-size:16px;
+}
+.month-btn:hover{ background:#4b6bff; }
+.month-label{
+    font-size:20px;
+}
 
-    def __repr__(self):
-        return f"<Task {self.title}>"
+/* HAFTA NOMLARI */
+.weekday-row{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+    margin-bottom:5px;
+    font-size:13px;
+    opacity:0.8;
+    text-align:center;
+}
 
+/* KALENDAR KUNLARI */
+.calendar-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+}
+.day-box{
+    background:#111827;
+    border-radius:12px;
+    min-height:100px;
+    border:1px solid #1f2937;
+    padding:8px;
+    font-size:13px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    transition:0.2s;
+    position:relative;
+}
+.day-box:hover{
+    border-color:#4b6bff;
+    transform:translateY(-1px);
+}
+.day-number{
+    font-size:14px;
+    font-weight:bold;
+    margin-bottom:4px;
+}
+.day-badges{
+    margin-top:auto;
+}
+.task-chip{
+    display:block;
+    padding:2px 5px;
+    border-radius:6px;
+    font-size:11px;
+    margin-top:3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
 
-# ---------------- TIZIM TASHKILOTLAR ---------------- #
+/* status bo‘yicha ranglar */
+.chip-new{ background:#4b6bff; }
+.chip-in_progress{ background:#fbbf24; color:#111; }
+.chip-done{ background:#22c55e; }
+.chip-rejected{ background:#ef4444; }
 
-class Organization(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), nullable=False)
-    employee_count = db.Column(db.Integer, default=0)
-    address = db.Column(db.String(255))
-    floor = db.Column(db.String(64))
-    comment = db.Column(db.Text)
+/* bugungi kun */
+.today-box{
+    border-color:#22c55e !important;
+    box-shadow:0 0 0 1px rgba(34,197,94,0.4);
+}
 
-    # org.vehicles orqali barcha transportlar
-    vehicles = db.relationship("Vehicle", backref="organization", lazy=True)
+/* MODAL */
+.modal-bg{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.7);
+    justify-content:center;
+    align-items:center;
+    z-index:50;
+}
+.modal-box{
+    background:#111827;
+    padding:20px;
+    border-radius:14px;
+    width:420px;
+    max-height:80vh;
+    overflow:auto;
+    border:1px solid #374151;
+}
+.modal-close{
+    float:right;
+    cursor:pointer;
+    font-size:22px;
+}
+.modal-task{
+    background:#1f2937;
+    border-radius:10px;
+    padding:10px;
+    border:1px solid #374151;
+    margin-bottom:8px;
+}
+.modal-task-title{
+    font-size:14px;
+    margin-bottom:4px;
+}
+.modal-task-meta{
+    font-size:12px;
+    opacity:0.85;
+}
+.modal-status-pill{
+    display:inline-block;
+    padding:2px 6px;
+    border-radius:6px;
+    font-size:11px;
+    margin-top:4px;
+}
+</style>
 
-    def __repr__(self):
-        return f"<Org {self.name}>"
+<script>
+// Backenddan keladigan json: [{title, description, date, status, due_date}, ...]
+const tasks = {{ tasks_json|safe }};
 
+let currentDate = new Date();
+renderCalendar();
 
-# ---------------- AVTO TRANSPORTLAR ---------------- #
+function renderCalendar(){
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
 
-class Vehicle(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    plate_number = db.Column(db.String(32), unique=True)
-    model = db.Column(db.String(64))
+    const firstDay = new Date(year, month, 1).getDay(); // 0 Yakshanba
+    const lastDate = new Date(year, month+1, 0).getDate();
 
-    driver_full_name = db.Column(db.String(128))
-    monthly_fuel_limit = db.Column(db.Float, default=0.0)
+    document.getElementById("monthYear").innerText =
+        currentDate.toLocaleString("uz-UZ", { month:"long", year:"numeric" });
 
-    last_repair_date = db.Column(db.Date)
-    last_repair_status = db.Column(db.String(255))
+    // dushanbani hafta boshi qilamiz (0=Yak → 6 ga surib, 1=Du → 0)
+    let offset = firstDay - 1;
+    if (offset < 0) offset = 6;
 
-    image_path = db.Column(db.String(255))
+    let html = "";
 
-    organization_id = db.Column(db.Integer, db.ForeignKey("organization.id"))
+    for (let i=0; i<offset; i++){
+        html += `<div></div>`;
+    }
 
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0,10); // YYYY-MM-DD
 
-# ---------------- OUTSORSING KOMPANIYALARI ---------------- #
+    for (let d=1; d<=lastDate; d++){
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const dayTasks = tasks.filter(t => t.date === dateStr);
 
-class OutsourceCompany(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128))
-    service_type = db.Column(db.String(128))
+        let chips = "";
+        dayTasks.slice(0,3).forEach(t => {
+            const st = (t.status || "new").replace(" ","_");
+            chips += `<span class="task-chip chip-${st}">${t.title}</span>`;
+        });
+        if (dayTasks.length > 3){
+            chips += `<span class="task-chip">+{{ dayTasks.length - 3 }} ta</span>`;
+        }
 
-    contract_number = db.Column(db.String(64))
-    contract_date = db.Column(db.Date)
-    contract_amount = db.Column(db.Float, default=0.0)
+        const isToday = (dateStr === todayStr);
 
-    comment = db.Column(db.Text)
+        html += `
+          <div class="day-box ${isToday ? 'today-box' : ''}" onclick="openModal('${dateStr}')">
+            <div class="day-number">${d}</div>
+            <div class="day-badges">
+              ${chips}
+            </div>
+          </div>
+        `;
+    }
 
+    document.getElementById("calendarGrid").innerHTML = html;
+}
 
-# ---------------- ORG TEXNIKA ---------------- #
+function prevMonth(){
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+}
 
-class OrgTech(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128))
-    model = db.Column(db.String(128))
-    serial_number = db.Column(db.String(128))
-    status = db.Column(db.String(64))  # new / working / repair / broken
+function nextMonth(){
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+}
 
-    assigned_to_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    assigned_to = db.relationship("User")
+function openModal(dateStr){
+    const dayTasks = tasks.filter(t => t.date === dateStr);
+    const box = document.getElementById("modalTasks");
+    let html = "";
 
-    last_update = db.Column(db.DateTime, default=datetime.utcnow)
+    if (dayTasks.length === 0){
+        html = "<div class='empty-text'>Bu kunda topshiriq yo‘q.</div>";
+    } else {
+        dayTasks.forEach(t => {
+            const st = (t.status || "new").replace(" ","_");
+            html += `
+              <div class="modal-task">
+                <div class="modal-task-title">${t.title}</div>
+                <div class="modal-task-meta">
+                  Muddat: ${t.due_date || "-"}<br>
+                  ${t.description || ""}
+                </div>
+                <span class="modal-status-pill chip-${st}">${t.status || "new"}</span>
+              </div>
+            `;
+        });
+    }
 
+    document.getElementById("modalDateTitle").innerText = "Sana: " + dateStr;
+    box.innerHTML = html;
+    document.getElementById("modalBg").style.display = "flex";
+}
 
-# ---------------- SHARTNOMALAR ---------------- #
+function closeModal(){
+    document.getElementById("modalBg").style.display = "none";
+}
+</script>
 
-class Contract(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200))
-    amount = db.Column(db.Float, default=0.0)
-    status = db.Column(db.String(32))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-# ---------------- SOLAR ---------------- #
-
-class SolarSite(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128))
-    external_url = db.Column(db.String(255))
-    capacity_kw = db.Column(db.Float, default=0.0)
-
-
-class SolarReading(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    site_id = db.Column(db.Integer, db.ForeignKey("solar_site.id"))
-    site = db.relationship("SolarSite", backref="readings")
-
-    date = db.Column(db.Date, default=date.today)
-    energy_kwh = db.Column(db.Float, default=0.0)
-
-
-# ---------------- HR: XODIM PROFILLARI ---------------- #
-
-class EmployeeProfile(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    user = db.relationship("User")
-
-    full_name = db.Column(db.String(128))
-    passport_info = db.Column(db.String(255))
-    diploma_info = db.Column(db.String(255))
-    other_docs = db.Column(db.String(255))
-
-    passport_file = db.Column(db.String(255))
-    diploma_file = db.Column(db.String(255))
-    other_file = db.Column(db.String(255))
-
-
-# ---------------- IJRO TOPSHIRIQLARI ---------------- #
-
-class IjroTask(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text)
-
-    date = db.Column(db.Date, default=date.today)
-    due_date = db.Column(db.Date)
-    status = db.Column(db.String(32), default="new")  # new / done
-
-    assigned_to_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    assigned_to = db.relationship("User")
-
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+{% endblock %}
