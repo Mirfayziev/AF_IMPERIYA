@@ -1,202 +1,321 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="calendar-container">
-    <h2 class="calendar-title">Ijro topshiriqlari – Kalendar</h2>
+<div class="calendar-page">
 
-    <div class="calendar-header">
-        <button onclick="prevMonth()" class="month-btn">◀</button>
-        <span id="monthYear" class="month-label"></span>
-        <button onclick="nextMonth()" class="month-btn">▶</button>
+  <div class="calendar-header-row">
+    <div>
+      <h1>Ijro kalendari</h1>
+      <p class="subtitle">Muddatli topshiriqlar kunlar bo‘yicha</p>
     </div>
+    <div class="cal-legend">
+      <span class="dot has-task"></span> Topshiriq bor kun
+      <span class="dot today-dot"></span> Bugungi kun
+    </div>
+  </div>
 
-    <div class="calendar-grid" id="calendarGrid"></div>
+  <div class="calendar-header">
+      <button onclick="prevMonth()" class="month-btn">◀</button>
+      <span id="monthYear" class="month-label"></span>
+      <button onclick="nextMonth()" class="month-btn">▶</button>
+  </div>
+
+  <div class="weekday-row">
+    <div>Du</div>
+    <div>Se</div>
+    <div>Ch</div>
+    <div>Pa</div>
+    <div>Ju</div>
+    <div>Sh</div>
+    <div>Ya</div>
+  </div>
+
+  <div class="calendar-grid" id="calendarGrid"></div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeModal()">×</span>
+    <h3 id="modalDateTitle">Topshiriqlar</h3>
+    <div id="modalTasks"></div>
+  </div>
 </div>
 
 <style>
-.calendar-container {
-    max-width: 900px;
+.calendar-page{
+    max-width: 980px;
     margin: auto;
-    padding: 20px;
-    color: #fff;
+    color:#fff;
 }
 
-.calendar-title {
-    text-align: center;
-    font-size: 28px;
-    margin-bottom: 20px;
+.calendar-header-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+.calendar-header-row h1{
+    margin:0;
+    font-size:26px;
+}
+.subtitle{
+    font-size:13px;
+    opacity:0.7;
+    margin-top:3px;
 }
 
-.calendar-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+.cal-legend{
+    font-size:12px;
+    opacity:0.8;
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+.dot{
+    display:inline-block;
+    width:10px; height:10px;
+    border-radius:50%;
+    margin-right:4px;
+}
+.dot.has-task{ background:#4b6bff; }
+.dot.today-dot{ background:#22c55e; }
+
+.calendar-header{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    margin-bottom:10px;
+}
+.month-btn{
+    background:#2e3448;
+    border:1px solid #3f4b63;
+    padding:6px 12px;
+    color:#fff;
+    border-radius:8px;
+    font-size:16px;
+}
+.month-btn:hover{ background:#4b6bff; }
+.month-label{
+    font-size:20px;
 }
 
-.month-btn {
-    background: #2e3448;
-    border: 1px solid #3f4b63;
-    padding: 8px 15px;
-    color: #fff;
-    border-radius: 8px;
-    font-size: 18px;
+/* HAFTA NOMLARI */
+.weekday-row{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+    margin-bottom:5px;
+    font-size:13px;
+    opacity:0.8;
+    text-align:center;
 }
 
-.month-btn:hover {
-    background: #4b6bff;
+/* KALENDAR KUNLARI */
+.calendar-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+}
+.day-box{
+    background:#111827;
+    border-radius:12px;
+    min-height:100px;
+    border:1px solid #1f2937;
+    padding:8px;
+    font-size:13px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    transition:0.2s;
+    position:relative;
+}
+.day-box:hover{
+    border-color:#4b6bff;
+    transform:translateY(-1px);
+}
+.day-number{
+    font-size:14px;
+    font-weight:bold;
+    margin-bottom:4px;
+}
+.day-badges{
+    margin-top:auto;
+}
+.task-chip{
+    display:block;
+    padding:2px 5px;
+    border-radius:6px;
+    font-size:11px;
+    margin-top:3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
-.month-label {
-    font-size: 22px;
+/* status bo‘yicha ranglar */
+.chip-new{ background:#4b6bff; }
+.chip-in_progress{ background:#fbbf24; color:#111; }
+.chip-done{ background:#22c55e; }
+.chip-rejected{ background:#ef4444; }
+
+/* bugungi kun */
+.today-box{
+    border-color:#22c55e !important;
+    box-shadow:0 0 0 1px rgba(34,197,94,0.4);
 }
 
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
+/* MODAL */
+.modal-bg{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.7);
+    justify-content:center;
+    align-items:center;
+    z-index:50;
 }
-
-.day-box {
-    background: #1c1f2b;
-    padding: 12px;
-    border-radius: 10px;
-    min-height: 110px;
-    border: 1px solid #2e3448;
-    cursor: pointer;
-    transition: 0.2s;
+.modal-box{
+    background:#111827;
+    padding:20px;
+    border-radius:14px;
+    width:420px;
+    max-height:80vh;
+    overflow:auto;
+    border:1px solid #374151;
 }
-
-.day-box:hover {
-    border-color: #4b6bff;
+.modal-close{
+    float:right;
+    cursor:pointer;
+    font-size:22px;
 }
-
-.day-number {
-    font-size: 16px;
-    margin-bottom: 5px;
+.modal-task{
+    background:#1f2937;
+    border-radius:10px;
+    padding:10px;
+    border:1px solid #374151;
+    margin-bottom:8px;
 }
-
-.task-badge {
-    background: #4b6bff;
-    padding: 4px 6px;
-    border-radius: 6px;
-    display: block;
-    margin-top: 4px;
-    font-size: 12px;
+.modal-task-title{
+    font-size:14px;
+    margin-bottom:4px;
 }
-
-/* Modal */
-.modal-bg {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    justify-content: center;
-    align-items: center;
+.modal-task-meta{
+    font-size:12px;
+    opacity:0.85;
 }
-
-.modal-box {
-    background: #1c1f2b;
-    padding: 25px;
-    border-radius: 12px;
-    width: 400px;
-    color: #fff;
-    border: 1px solid #2e3448;
+.modal-status-pill{
+    display:inline-block;
+    padding:2px 6px;
+    border-radius:6px;
+    font-size:11px;
+    margin-top:4px;
 }
-
-.modal-close {
-    float: right;
-    cursor: pointer;
-    font-size: 22px;
-}
-
-.modal-task {
-    margin-bottom: 10px;
-    padding: 10px;
-    background: #222634;
-    border-radius: 8px;
-    border: 1px solid #333b52;
-}
-
 </style>
 
-<div class="modal-bg" id="modalBg">
-    <div class="modal-box">
-        <span class="modal-close" onclick="closeModal()">×</span>
-        <h3>Topshiriqlar</h3>
-        <div id="modalTasks"></div>
-    </div>
-</div>
-
 <script>
-const tasks = {{ tasks_json|safe }};  // app.py dan keladigan json
+// Backenddan keladigan json: [{title, description, date, status, due_date}, ...]
+const tasks = {{ tasks_json|safe }};
 
 let currentDate = new Date();
 renderCalendar();
 
-function renderCalendar() {
+function renderCalendar(){
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
-    const firstDay = new Date(year, month, 1).getDay();
-    const lastDate = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay(); // 0 Yakshanba
+    const lastDate = new Date(year, month+1, 0).getDate();
 
     document.getElementById("monthYear").innerText =
-        currentDate.toLocaleString("uz-UZ", { month: "long", year: "numeric" });
+        currentDate.toLocaleString("uz-UZ", { month:"long", year:"numeric" });
+
+    // dushanbani hafta boshi qilamiz (0=Yak → 6 ga surib, 1=Du → 0)
+    let offset = firstDay - 1;
+    if (offset < 0) offset = 6;
 
     let html = "";
 
-    for (let i = 0; i < firstDay; i++) {
+    for (let i=0; i<offset; i++){
         html += `<div></div>`;
     }
 
-    for (let day = 1; day <= lastDate; day++) {
-        const fullDate = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0,10); // YYYY-MM-DD
 
-        let dayTasks = tasks.filter(t => t.date === fullDate);
+    for (let d=1; d<=lastDate; d++){
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const dayTasks = tasks.filter(t => t.date === dateStr);
+
+        let chips = "";
+        dayTasks.slice(0,3).forEach(t => {
+            const st = (t.status || "new").replace(" ","_");
+            chips += `<span class="task-chip chip-${st}">${t.title}</span>`;
+        });
+        if (dayTasks.length > 3){
+            chips += `<span class="task-chip">+{{ dayTasks.length - 3 }} ta</span>`;
+        }
+
+        const isToday = (dateStr === todayStr);
 
         html += `
-            <div class="day-box" onclick="openModal('${fullDate}')">
-                <div class="day-number">${day}</div>
-                ${dayTasks.map(t => `<span class='task-badge'>${t.title}</span>`).join("")}
+          <div class="day-box ${isToday ? 'today-box' : ''}" onclick="openModal('${dateStr}')">
+            <div class="day-number">${d}</div>
+            <div class="day-badges">
+              ${chips}
             </div>
+          </div>
         `;
     }
 
     document.getElementById("calendarGrid").innerHTML = html;
 }
 
-function prevMonth() {
+function prevMonth(){
     currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendar();
 }
 
-function nextMonth() {
+function nextMonth(){
     currentDate.setMonth(currentDate.getMonth() + 1);
     renderCalendar();
 }
 
-function openModal(date) {
-    const dayTasks = tasks.filter(t => t.date === date);
+function openModal(dateStr){
+    const dayTasks = tasks.filter(t => t.date === dateStr);
+    const box = document.getElementById("modalTasks");
     let html = "";
 
-    dayTasks.forEach(t => {
-        html += `
-            <div class="modal-task">
-                <b>${t.title}</b><br>
-                ${t.description}
-            </div>
-        `;
-    });
+    if (dayTasks.length === 0){
+        html = "<div class='empty-text'>Bu kunda topshiriq yo‘q.</div>";
+    } else {
+        dayTasks.forEach(t => {
+            const st = (t.status || "new").replace(" ","_");
+            html += `
+              <div class="modal-task">
+                <div class="modal-task-title">${t.title}</div>
+                <div class="modal-task-meta">
+                  Muddat: ${t.due_date || "-"}<br>
+                  ${t.description || ""}
+                </div>
+                <span class="modal-status-pill chip-${st}">${t.status || "new"}</span>
+              </div>
+            `;
+        });
+    }
 
-    document.getElementById("modalTasks").innerHTML = html;
+    document.getElementById("modalDateTitle").innerText = "Sana: " + dateStr;
+    box.innerHTML = html;
     document.getElementById("modalBg").style.display = "flex";
 }
 
-function closeModal() {
+function closeModal(){
     document.getElementById("modalBg").style.display = "none";
 }
 </script>
 
 {% endblock %}
+
