@@ -1,31 +1,45 @@
 {% extends "base.html" %}
-{% block page_title %}Transport qo'shish{% endblock %}
-{% block header_title %}Yangi transport qo'shish{% endblock %}
+{% if v %}
+  {% set title = "Transportni tahrirlash" %}
+{% else %}
+  {% set title = "Yangi transport qo'shish" %}
+{% endif %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block header_title %}{{ title }}{% endblock %}
 {% block content %}
 <div class="card-block">
   <form method="post" enctype="multipart/form-data" class="form">
     <label>Davlat raqami:
-      <input type="text" name="plate_number" required>
+      <input type="text" name="plate_number" value="{{ v.plate_number if v else '' }}" required>
     </label>
     <label>Modeli:
-      <input type="text" name="model" required>
+      <input type="text" name="model" value="{{ v.model if v else '' }}" required>
     </label>
-    <label>Haydovchi F.I.Sh (ixtiyoriy):
-      <input type="text" name="driver_full_name">
+    <label>Haydovchi F.I.Sh:
+      <input type="text" name="driver_full_name" value="{{ v.driver_full_name if v else '' }}">
     </label>
     <label>Oylik benzin limiti (L):
-      <input type="number" name="monthly_fuel_limit" required>
+      <input type="number" step="0.1" name="monthly_fuel_limit" value="{{ v.monthly_fuel_limit if v else '' }}" required>
     </label>
-    <label>Rasm yuklash:
-      <input type="file" name="image">
+    <label>Oxirgi remont sanasi:
+      <input type="date" name="last_repair_date" value="{{ v.last_repair_date|string if v and v.last_repair_date else '' }}">
+    </label>
+    <label>Oxirgi holati (remont haqida qisqacha):
+      <input type="text" name="last_repair_status" value="{{ v.last_repair_status if v else '' }}">
     </label>
     <label>Tizim tashkiloti:
       <select name="organization_id">
         <option value="">Tashkilot tanlanmagan</option>
         {% for o in orgs %}
-        <option value="{{ o.id }}">{{ o.name }}</option>
+        <option value="{{ o.id }}" {% if v and v.organization_id == o.id %}selected{% endif %}>{{ o.name }}</option>
         {% endfor %}
       </select>
+    </label>
+    <label>Rasm yuklash:
+      <input type="file" name="image">
+      {% if v and v.image_path %}
+        <small>Hozirgi rasm: {{ v.image_path }}</small>
+      {% endif %}
     </label>
     <button type="submit" class="btn-primary">Saqlash</button>
   </form>
