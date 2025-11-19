@@ -2,91 +2,87 @@
 {% block content %}
 
 <div class="page-title">
-    <h1>Outsorsing kompaniyalari</h1>
+    <h1>OrgTexnika</h1>
 </div>
 
 {% if session.get("user_role") in ["admin","manager"] %}
 <div style="margin-bottom:15px;">
-    <a href="/outsourcing/create" class="btn btn-primary">+ Yangi kompaniya</a>
+    <a href="/orgtech/create" class="btn btn-primary">+ Texnika qo‘shish</a>
 </div>
 {% endif %}
 
-<div class="outs-grid">
+<div class="org-grid">
 
-    {% for c in companies %}
-    <div class="outs-card" onclick="window.location='/outsourcing/{{ c.id }}'">
+    {% for t in items %}
+    <div class="org-card" onclick="window.location='/orgtech/{{ t.id }}'">
 
-        <div class="outs-header">
-            <h3>{{ c.name }}</h3>
-            <span class="badge blue">{{ c.service_type }}</span>
+        <div class="org-header">
+            <h3>{{ t.name }}</h3>
+            <span class="status {{ t.status }}">{{ t.status }}</span>
         </div>
 
-        <div class="outs-body">
-            <div><b>Shartnoma №:</b> {{ c.contract_number or "—" }}</div>
-            <div><b>Sana:</b> {{ c.contract_date or "—" }}</div>
-            <div><b>Summasi:</b> {{ "%.2f"|format(c.contract_amount or 0) }} so‘m</div>
+        <div class="org-body">
+            <div><b>Model:</b> {{ t.model }}</div>
+            <div><b>Serial №:</b> {{ t.serial_number }}</div>
+            <div><b>Biriktirilgan:</b> {{ t.assigned_to.username if t.assigned_to else "—" }}</div>
         </div>
 
-        <div class="outs-footer">
-            <small>{{ c.comment[:80] if c.comment else "" }}</small>
+        <div class="org-footer">
+            <small>Oxirgi yangilanish: {{ t.last_update }}</small>
         </div>
 
     </div>
     {% else %}
-        <div class="empty-text">Hali birorta kompaniya kiritilmagan.</div>
+        <div class="empty-text">Texnikalar hali kiritilmagan.</div>
     {% endfor %}
 
 </div>
 
 <style>
-
-.outs-grid{
+.org-grid{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(330px,1fr));
-    gap:14px;
+    gap:15px;
 }
 
-.outs-card{
+.org-card{
     background:#1c1f2b;
-    padding:20px;
+    padding:18px;
     border-radius:14px;
     border:1px solid #2e3448;
-    transition:0.25s;
+    transition:0.2s;
     cursor:pointer;
 }
+.org-card:hover{ border-color:#4b6bff; }
 
-.outs-card:hover{
-    border-color:#4b6bff;
-}
-
-.outs-header{
+.org-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:10px;
+    margin-bottom:8px;
 }
 
-.badge{
+.status{
     padding:4px 8px;
     border-radius:6px;
     font-size:12px;
+    text-transform:uppercase;
 }
+.status.working{ background:#00c853; }
+.status.repair{ background:#ffa726; }
+.status.broken{ background:#ff5252; }
+.status.new{ background:#4b6bff; }
 
-.badge.blue{
-    background:#4b6bff;
-}
-
-.outs-body div{
-    margin-bottom:4px;
+.org-body div{
     font-size:14px;
+    margin-bottom:4px;
 }
 
-.outs-footer{
-    margin-top:12px;
+.org-footer{
+    margin-top:10px;
     opacity:0.7;
     font-size:12px;
 }
-
 </style>
 
 {% endblock %}
