@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block page_title %}Tizim tashkilotlar{% endblock %}
+{% block header_title %}Tizim tashkilotlar{% endblock %}
+{% block content %}
+<div class="card-block">
+  <div class="card-header">
+    <h2>Tizim tashkilotlar</h2>
+    <a href="{{ url_for('orgs_create') }}" class="card-link">+ Yangi tashkilot</a>
+  </div>
+  <table class="table compact-table">
+    <thead>
+      <tr><th>Nomi</th><th>Xodimlar</th><th>Manzil</th><th>Qavat</th></tr>
+    </thead>
+    <tbody>
+      {% for o in orgs %}
+      <tr onclick="window.location='{{ url_for('orgs_detail', org_id=o.id) }}'">
+        <td>{{ o.name }}</td>
+        <td>{{ o.employee_count }}</td>
+        <td>{{ o.address }}</td>
+        <td>{{ o.floor }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-text">Hali tashkilot kiritilmagan.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

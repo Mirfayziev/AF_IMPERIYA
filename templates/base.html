@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block page_title %}AI Imperiya{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="AF Logo">
+            <div class="sidebar-logo-text">AF Imperiya</div>
+        </div>
+        <nav class="sidebar-menu">
+            {% if session.get('user_role') == 'manager' %}
+                <a href="{{ url_for('manager_dashboard') }}" class="menu-item">
+                    <span class="menu-icon">📊</span><span class="menu-text">Rahbar paneli</span>
+                </a>
+                <a href="{{ url_for('orgs_list') }}" class="menu-item">
+                    <span class="menu-icon">🏢</span><span class="menu-text">Tizim tashkilotlar</span>
+                </a>
+                <a href="{{ url_for('vehicles_list') }}" class="menu-item">
+                    <span class="menu-icon">🚗</span><span class="menu-text">Avtotransportlar</span>
+                </a>
+                <a href="{{ url_for('outsourcing_list') }}" class="menu-item">
+                    <span class="menu-icon">🤝</span><span class="menu-text">Outsorsing</span>
+                </a>
+                <a href="{{ url_for('orgtech_list') }}" class="menu-item">
+                    <span class="menu-icon">🖨</span><span class="menu-text">Orgtexnika</span>
+                </a>
+                <a href="{{ url_for('contracts_list') }}" class="menu-item">
+                    <span class="menu-icon">📄</span><span class="menu-text">Shartnomalar</span>
+                </a>
+                <a href="{{ url_for('ijro_list') }}" class="menu-item">
+                    <span class="menu-icon">📆</span><span class="menu-text">Ijro kalendari</span>
+                </a>
+                <a href="{{ url_for('hr_users') }}" class="menu-item">
+                    <span class="menu-icon">👥</span><span class="menu-text">Xodimlar</span>
+                </a>
+                <a href="{{ url_for('solar_dashboard') }}" class="menu-item">
+                    <span class="menu-icon">☀</span><span class="menu-text">Solar</span>
+                </a>
+            {% elif session.get('user_role') == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}" class="menu-item">
+                    <span class="menu-icon">🛠</span><span class="menu-text">Admin paneli</span>
+                </a>
+                <a href="{{ url_for('hr_users') }}" class="menu-item">
+                    <span class="menu-icon">👥</span><span class="menu-text">Foydalanuvchilar</span>
+                </a>
+            {% elif session.get('user_role') == 'employee' %}
+                <a href="{{ url_for('employee_dashboard') }}" class="menu-item">
+                    <span class="menu-icon">🧑‍💻</span><span class="menu-text">Xodim paneli</span>
+                </a>
+                <a href="{{ url_for('ijro_list') }}" class="menu-item">
+                    <span class="menu-icon">📆</span><span class="menu-text">Ijro topshiriqlari</span>
+                </a>
+            {% endif %}
+        </nav>
+        <div class="sidebar-bottom">
+            <a href="{{ url_for('logout') }}" class="menu-item">
+                <span class="menu-icon">🚪</span><span>Chiqish</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-panel">
+        <header class="topbar">
+            <div class="topbar-left">
+                <h1 class="topbar-title">{% block header_title %}{% endblock %}</h1>
+            </div>
+            <div class="topbar-right">
+                <div class="search-box">
+                    <input type="text" placeholder="Qidirish...">
+                </div>
+                <div class="topbar-user">
+                    <div class="avatar-small">AF</div>
+                    <div class="topbar-user-name">{{ session.get('user_role')|capitalize if session.get('user_role') else '' }}</div>
+                </div>
+            </div>
+        </header>
+
+        <section class="top-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </section>
+
+        <section class="dashboard-content">
+            {% block content %}{% endblock %}
+        </section>
+    </main>
+</div>
+</body>
+</html>

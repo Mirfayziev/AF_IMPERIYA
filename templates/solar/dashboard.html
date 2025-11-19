@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block page_title %}Solar panel{% endblock %}
+{% block header_title %}Solar kuzatuv paneli{% endblock %}
+{% block content %}
+<div class="card-block">
+  <table class="table compact-table">
+    <thead><tr><th>Obyekt</th><th>Quvvati (kW)</th><th>Tashqi sayt</th></tr></thead>
+    <tbody>
+      {% for s in sites %}
+      <tr>
+        <td>{{ s.name }}</td>
+        <td>{{ s.capacity_kw }}</td>
+        <td>{% if s.external_url %}<a href="{{ s.external_url }}" target="_blank">Ko'rish</a>{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="empty-text">Solar obyektlari yo'q.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

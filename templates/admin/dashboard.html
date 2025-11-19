@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block page_title %}Admin paneli{% endblock %}
+{% block header_title %}Admin paneli{% endblock %}
+{% block content %}
+<div class="grid-main">
+  <div class="card-block">
+    <h2>Umumiy statistika</h2>
+    <ul class="list">
+      <li><b>Foydalanuvchilar:</b> {{ user_count }}</li>
+      <li><b>Topshiriqlar:</b> {{ task_count }}</li>
+      <li><b>Shartnoma summasi:</b> {{ '%.1f'|format(contract_sum or 0) }} $</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

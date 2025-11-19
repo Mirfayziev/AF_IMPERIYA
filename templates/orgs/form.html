@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block page_title %}Tizim tashkiloti{% endblock %}
+{% block header_title %}Tizim tashkiloti qo'shish{% endblock %}
+{% block content %}
+<div class="card-block">
+  <form method="post" class="form">
+    <label>Tashkilot nomi
+      <input type="text" name="name" required>
+    </label>
+    <label>Xodimlar soni
+      <input type="number" name="employee_count" min="0" step="1">
+    </label>
+    <label>Manzil
+      <input type="text" name="address">
+    </label>
+    <label>Qavati
+      <input type="text" name="floor">
+    </label>
+    <label>Izoh
+      <textarea name="comment" rows="3"></textarea>
+    </label>
+    <button type="submit" class="btn-link">Saqlash</button>
+  </form>
+</div>
+{% endblock %}

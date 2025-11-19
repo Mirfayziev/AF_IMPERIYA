@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block page_title %}Xodimlar{% endblock %}
+{% block header_title %}Xodimlar ro'yxati{% endblock %}
+{% block content %}
+<div class="card-block">
+  <table class="table compact-table">
+    <thead><tr><th>Login</th><th>Roli</th></tr></thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.username }}</td>
+        <td>{{ u.role }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="2" class="empty-text">Foydalanuvchilar yo'q.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

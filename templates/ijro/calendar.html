@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block page_title %}Ijro kalendari{% endblock %}
+{% block header_title %}Ijro kalendari{% endblock %}
+{% block content %}
+<div class="card-block">
+  <div class="card-header">
+    <h2>Ijro topshiriqlari</h2>
+    <a href="#" class="card-link">Excel import/export keyin qo'shiladi</a>
+  </div>
+  <table class="table compact-table">
+    <thead><tr><th>Nom</th><th>Ijrochi</th><th>Boshlanish</th><th>Muddat</th><th>Holat</th></tr></thead>
+    <tbody>
+      {% for t in ijro_tasks %}
+      <tr>
+        <td>{{ t.title }}</td>
+        <td>{{ t.assigned_to.username if t.assigned_to else '—' }}</td>
+        <td>{{ t.start_date }}</td>
+        <td>{{ t.due_date }}</td>
+        <td>{{ t.status }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-text">Ijro topshiriqlari yo'q.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

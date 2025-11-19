@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block page_title %}Orgtexnika qo'shish{% endblock %}
+{% block header_title %}Orgtexnika qo'shish{% endblock %}
+{% block content %}
+<div class="card-block">
+  <form method="post" class="form">
+    <label>Nomi
+      <input type="text" name="name" required>
+    </label>
+    <label>Model
+      <input type="text" name="model">
+    </label>
+    <label>Serial raqami
+      <input type="text" name="serial_number">
+    </label>
+    <label>Holati
+      <select name="status">
+        <option value="new">Yangi</option>
+        <option value="working">Ishlayapti</option>
+        <option value="repair">Ta'mirda</option>
+        <option value="broken">Nosoz</option>
+      </select>
+    </label>
+    <label>Xodimga biriktirish
+      <select name="assigned_to_id">
+        <option value="">Tanlanmagan</option>
+        {% for u in users %}
+        <option value="{{ u.id }}">{{ u.username }} ({{ u.role }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit" class="btn-link">Saqlash</button>
+  </form>
+</div>
+{% endblock %}

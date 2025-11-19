@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block page_title %}Avto transportlar{% endblock %}
+{% block header_title %}Avto transportlar{% endblock %}
+{% block content %}
+<div class="card-block">
+  <div class="card-header">
+    <h2>Avto transportlar ro'yxati</h2>
+    <a href="{{ url_for('vehicles_create') }}" class="card-link">+ Yangi transport</a>
+  </div>
+  <div class="vehicle-list">
+    {% for v in vehicles %}
+    <div class="vehicle-row" onclick="window.location='{{ url_for('vehicles_detail', vehicle_id=v.id) }}'">
+      <div class="vehicle-img-placeholder">🚗</div>
+      <div class="vehicle-main">
+        <div class="vehicle-title">{{ v.plate_number }} – {{ v.model }}</div>
+        <div class="vehicle-meta">Haydovchi: {{ v.driver_full_name or "biriktirilmagan" }}</div>
+        <div class="vehicle-meta">Limit: {{ v.monthly_fuel_limit or 0 }} L</div>
+        <div class="vehicle-meta">Oxirgi remont: {{ v.last_repair_date or "—" }}</div>
+      </div>
+      <div class="vehicle-side">
+        <div class="vehicle-badge">{{ v.organization.name if v.organization else "Tashkilot yo'q" }}</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-text">Hali transport kiritilmagan.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

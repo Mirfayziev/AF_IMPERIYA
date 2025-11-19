@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block page_title %}Xodim paneli{% endblock %}
+{% block header_title %}Xodim paneli{% endblock %}
+{% block content %}
+<div class="grid-main">
+  <div class="card-block">
+    <div class="card-header">
+      <h2>Menga biriktirilgan topshiriqlar</h2>
+    </div>
+    <div class="task-short-list">
+      {% for t in my_tasks %}
+      <div class="task-row">
+        <div class="task-main">
+          <div class="task-title">{{ t.title }}</div>
+          <div class="task-meta">Muddat: {{ t.due_date or '—' }}</div>
+        </div>
+        <div class="task-status-pill status-{{ t.status }}">{{ t.status }}</div>
+      </div>
+      {% else %}
+      <div class="empty-text">Sizga biriktirilgan topshiriqlar yo'q.</div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card-block">
+    <div class="card-header"><h2>Ijro topshiriqlari</h2></div>
+    <ul class="list">
+      {% for t in ijro %}
+      <li>{{ t.title }} – {{ t.start_date }} → {{ t.due_date }} ({{ t.status }})</li>
+      {% else %}
+      <li class="empty-text">Ijro topshiriqlari yo'q.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="card-block">
+    <div class="card-header"><h2>Shaxsiy ma'lumotlar</h2></div>
+    {% if profile %}
+    <ul class="list">
+      <li><b>Pasport:</b> {{ profile.passport_number }}</li>
+      <li><b>Diplom:</b> {{ profile.diploma_info }}</li>
+      <li><b>Boshqa:</b> {{ profile.other_info }}</li>
+    </ul>
+    {% else %}
+    <div class="empty-text">Profil ma'lumotlari kiritilmagan.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

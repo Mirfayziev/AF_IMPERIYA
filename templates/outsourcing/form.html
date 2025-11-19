@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block page_title %}Outsorsing qo'shish{% endblock %}
+{% block header_title %}Outsorsing tashkiloti qo'shish{% endblock %}
+{% block content %}
+<div class="card-block">
+  <form method="post" class="form">
+    <label>Nomi
+      <input type="text" name="name" required>
+    </label>
+    <label>Xizmat turi
+      <input type="text" name="service_type">
+    </label>
+    <label>Shartnoma raqami
+      <input type="text" name="contract_number">
+    </label>
+    <label>Shartnoma summasi
+      <input type="number" name="contract_amount" step="0.1" min="0">
+    </label>
+    <label>Izoh
+      <textarea name="comment" rows="3"></textarea>
+    </label>
+    <button type="submit" class="btn-link">Saqlash</button>
+  </form>
+</div>
+{% endblock %}
