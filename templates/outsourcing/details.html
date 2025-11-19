@@ -1,24 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>{{ company.name }}</h1>
+<h1>{{ item.name }}</h1>
 
 <div class="card-block">
+
     <h2>Asosiy ma'lumotlar</h2>
 
     <ul class="list">
-        <li><b>Kompaniya:</b> {{ company.name }}</li>
-        <li><b>Xizmat turi:</b> {{ company.service_type }}</li>
-        <li><b>Shartnoma raqami:</b> {{ company.contract_number }}</li>
-        <li><b>Sana:</b> {{ company.contract_date }}</li>
-        <li><b>Summasi:</b> {{ company.contract_amount }} so‘m</li>
-        <li><b>Izoh:</b> {{ company.comment }}</li>
+        <li><b>Model:</b> {{ item.model }}</li>
+        <li><b>Serial raqam:</b> {{ item.serial_number }}</li>
+        <li><b>Status:</b> {{ item.status }}</li>
+        <li><b>Xodimga biriktirilgan:</b>
+            {{ item.assigned_to.username if item.assigned_to else "—" }}
+        </li>
+        <li><b>Izoh:</b> {{ item.comment }}</li>
+        <li><b>Oxirgi yangilanish:</b> {{ item.last_update }}</li>
     </ul>
 
 </div>
 
 {% if session.get("user_role") in ["admin","manager"] %}
-    <a class="btn btn-warning" href="/outsourcing/edit/{{ company.id }}">Tahrirlash</a>
+<a class="btn btn-warning" href="/orgtech/edit/{{ item.id }}">Tahrirlash</a>
 {% endif %}
 
 {% endblock %}
