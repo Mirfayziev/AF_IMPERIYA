@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block header_title %}Transport qo‘shish{% endblock %}
+{% block content %}
+
+<div class="card big-card">
+
+  <h2>Transport qo‘shish</h2>
+
+  <form method="post" enctype="multipart/form-data">
+
+      <label>Model</label>
+      <input name="model" required>
+
+      <label>Davlat raqami</label>
+      <input name="plate_number" required>
+
+      <label>Haydovchi F.I.Sh</label>
+      <input name="driver_full_name" placeholder="Ism Familiya">
+
+      <label>Oylik benzin limiti (L)</label>
+      <input type="number" name="monthly_fuel_limit" placeholder="50">
+
+      <label>Oxirgi ta’mir sanasi</label>
+      <input type="date" name="last_repair_date">
+
+      <label>Transport rasmi</label>
+      <input type="file" name="photo">
+
+      <button class="btn btn-primary" style="margin-top:15px;">Saqlash</button>
+
+  </form>
+
+</div>
+
+<style>
+.big-card{
+  padding:25px;
+  max-width:600px;
+  margin:auto;
+}
+input{
+  width:100%; padding:10px; border-radius:8px;
+  margin-bottom:12px;
+  background:#222634; border:1px solid #2e3448; color:#fff;
+}
+</style>
+
+{% endblock %}
