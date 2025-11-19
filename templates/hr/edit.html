@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block header_title %}Xodimni tahrirlash{% endblock %}
+{% block content %}
+
+<div class="card big-card">
+
+  <h2>Xodim ma’lumotlarini tahrirlash</h2>
+
+  <form method="post" enctype="multipart/form-data">
+
+      <label>F.I.Sh</label>
+      <input name="full_name" value="{{ user.full_name }}" required>
+
+      <label>Lavozim</label>
+      <input name="position" value="{{ user.position }}">
+
+      <label>Telefon</label>
+      <input name="phone" value="{{ user.phone }}">
+
+      <label>Manzil</label>
+      <input name="address" value="{{ user.address }}">
+
+      <label>Tug‘ilgan sana</label>
+      <input type="date" name="birth_date" value="{{ user.birth_date }}">
+
+      <hr>
+
+      <h3>Passport ma’lumotlari</h3>
+
+      <label>Seriya</label>
+      <input name="passport_series" value="{{ user.passport_series }}">
+
+      <label>Raqam</label>
+      <input name="passport_number" value="{{ user.passport_number }}">
+
+      <label>Berilgan sana</label>
+      <input type="date" name="passport_given_date" value="{{ user.passport_given_date }}">
+
+      <label>Berilgan joy</label>
+      <input name="passport_given_by" value="{{ user.passport_given_by }}">
+
+      <hr>
+
+      <h3>Diplom ma’lumotlari</h3>
+
+      <label>Diplom turi</label>
+      <input name="diploma_type" value="{{ user.diploma_type }}">
+
+      <label>O‘quv muassasa</label>
+      <input name="diploma_from" value="{{ user.diploma_from }}">
+
+      <label>Bitirgan yil</label>
+      <input type="number" name="diploma_year" value="{{ user.diploma_year }}">
+
+      <hr>
+
+      <h3>Rasm (ixtiyoriy)</h3>
+      <input type="file" name="photo">
+
+      <h3>Qo‘shimcha fayllar</h3>
+      <input type="file" name="docs" multiple>
+
+      <button class="btn btn-primary" style="margin-top:15px;">Saqlash</button>
+
+  </form>
+
+</div>
+
+<style>
+.big-card{
+  padding:25px; max-width:700px; margin:auto;
+}
+input,textarea{
+  width:100%; padding:10px; border-radius:8px;
+  margin-bottom:12px;
+  background:#222634; border:1px solid #2e3448; color:#fff;
+}
+</style>
+
+{% endblock %}
