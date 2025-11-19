@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card big-card">
+    <h2>Yangi ijro topshirig‘i</h2>
+
+    <form action="/ijro/create" method="post">
+        <label>Sarlavha</label>
+        <input type="text" name="title" required>
+
+        <label>Tavsif</label>
+        <textarea name="description" rows="4"></textarea>
+
+        <label>Muddat (due date)</label>
+        <input type="date" name="due_date">
+
+        <label>Xodimga biriktirish</label>
+        <select name="assigned_to">
+            <option value="">Tanlanmagan</option>
+            {% for u in employees %}
+                <option value="{{ u.id }}">{{ u.username }}</option>
+            {% endfor %}
+        </select>
+
+        <button class="btn btn-primary" style="margin-top:15px;">Saqlash</button>
+    </form>
+</div>
+
+<style>
+.big-card{
+    padding:25px;
+    max-width:600px;
+    margin:auto;
+}
+input,textarea,select{
+    width:100%;
+    background:#222634;
+    border:1px solid #2e3448;
+    color:#fff;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:12px;
+}
+</style>
+
+{% endblock %}
