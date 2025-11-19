@@ -1,14 +1,44 @@
-{% extends 'base.html' %}
-{% block header_title %}Xodimlar nazorati{% endblock %}
+{% extends "base.html" %}
+{% block page_title %}Xodimlar{% endblock %}
+{% block header_title %}Xodimlar ro'yxati{% endblock %}
 {% block content %}
+
 <div class="card-block">
-  <h2>Xodimlar</h2>
-  <ul class="list">
-    {% for e in employees %}
-      <li>{{ e.username }}</li>
-    {% else %}
-      <li class="empty-text">Xodimlar yo'q.</li>
-    {% endfor %}
-  </ul>
+  <h2>Barcha xodimlar</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Login</th>
+        <th>Ism-Familya</th>
+        <th>Hujjatlar</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in employees %}
+      <tr>
+        <td>{{ u.username }}</td>
+        <td>
+          {% set p = profiles | selectattr("user_id", "equalto", u.id) | first %}
+          {{ p.full_name if p else "Kiritilmagan" }}
+        </td>
+        <td>
+          {% if p and (p.passport_file or p.diploma_file or p.other_file) %}
+            ✔ Bor
+          {% else %}
+            — Yo‘q
+          {% endif %}
+        </td>
+        <td>
+          <a href="{{ url_for('hr_detail', user_id=u.id) }}" class="btn-primary">Ko‘rish</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-text">Xodimlar yo'q</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
+
 {% endblock %}
