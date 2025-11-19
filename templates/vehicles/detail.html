@@ -16,10 +16,17 @@
       <ul class="list">
         <li><b>Haydovchi:</b> {{ v.driver_full_name or "Biriktirilmagan" }}</li>
         <li><b>Oylik limit:</b> {{ v.monthly_fuel_limit }} L</li>
-        <li><b>Oxirgi remont:</b> {{ v.last_repair_date or "—" }}</li>
+        <li><b>Oxirgi remont sanasi:</b> {{ v.last_repair_date or "—" }}</li>
         <li><b>Holati:</b> {{ v.last_repair_status or "—" }}</li>
         <li><b>Tizim tashkiloti:</b> {{ v.organization.name if v.organization else "Belgilanishi kerak" }}</li>
       </ul>
+
+      <div style="margin-top:10px; display:flex; gap:8px;">
+        <a href="{{ url_for('vehicles_edit', vehicle_id=v.id) }}" class="btn-primary" style="text-decoration:none;display:inline-block;">Tahrirlash</a>
+        <form method="post" action="{{ url_for('vehicles_delete', vehicle_id=v.id) }}" onsubmit="return confirm('Rostdan o\'chirasizmi?');">
+          <button type="submit" class="btn-primary" style="background:#ef4444;">O'chirish</button>
+        </form>
+      </div>
     </div>
   </div>
 </div>
