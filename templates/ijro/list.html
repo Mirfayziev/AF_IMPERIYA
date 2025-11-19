@@ -1,8 +1,59 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% block page_title %}Ijro kalendari{% endblock %}
 {% block header_title %}Ijro kalendari{% endblock %}
 {% block content %}
 <div class="card-block">
-  <h2>Ijro topshiriqlari</h2>
-  <p>Keyinchalik bu yerda to'liq kalendar, muddatlar va Excel import/export bo'ladi.</p>
+  <div class="card-header">
+    <h2>Ijro topshiriqlari</h2>
+    {% if session.get('user_role') in ['manager', 'admin'] %}
+      <a href="{{ url_for('ijro_create') }}" class="card-link">+ Yangi ijro topshirig'i</a>
+    {% endif %}
+  </div>
+
+  <form method="get" class="form" style="margin-bottom:12px;">
+    <label>Sana bo'yicha filtr:
+      <input type="date" name="date" value="{{ selected_date or '' }}">
+    </label>
+    <button type="submit" class="btn-primary" style="margin-top:6px;">Filtrlash</button>
+  </form>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Sana</th>
+        <th>Nomi</th>
+        <th>Ijrochi</th>
+        <th>Muddat</th>
+        <th>Holat</th>
+        {% if session.get('user_role') in ['employee','manager','admin'] %}
+          <th>Amal</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in tasks %}
+      <tr>
+        <td>{{ t.date }}</td>
+        <td>{{ t.title }}</td>
+        <td>{{ t.assigned_to.username if t.assigned_to else "Biriktirilmagan" }}</td>
+        <td>{{ t.due_date or "—" }}</td>
+        <td>{{ t.status }}</td>
+        {% if session.get('user_role') in ['employee','manager','admin'] %}
+        <td>
+          {% if t.status != 'done' %}
+          <form method="post" action="{{ url_for('ijro_mark_done', task_id=t.id) }}">
+            <button type="submit" class="btn-primary" style="padding:4px 8px;font-size:11px;">Bajarildi</button>
+          </form>
+          {% else %}
+            ✔
+          {% endif %}
+        </td>
+        {% endif %}
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="empty-text">Ijro topshiriqlari yo'q.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}
