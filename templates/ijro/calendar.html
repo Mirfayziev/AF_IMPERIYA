@@ -1,27 +1,202 @@
 {% extends "base.html" %}
-{% block page_title %}Ijro kalendari{% endblock %}
-{% block header_title %}Ijro kalendari{% endblock %}
 {% block content %}
-<div class="card-block">
-  <div class="card-header">
-    <h2>Ijro topshiriqlari</h2>
-    <a href="#" class="card-link">Excel import/export keyin qo'shiladi</a>
-  </div>
-  <table class="table compact-table">
-    <thead><tr><th>Nom</th><th>Ijrochi</th><th>Boshlanish</th><th>Muddat</th><th>Holat</th></tr></thead>
-    <tbody>
-      {% for t in ijro_tasks %}
-      <tr>
-        <td>{{ t.title }}</td>
-        <td>{{ t.assigned_to.username if t.assigned_to else '—' }}</td>
-        <td>{{ t.start_date }}</td>
-        <td>{{ t.due_date }}</td>
-        <td>{{ t.status }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="5" class="empty-text">Ijro topshiriqlari yo'q.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+<div class="calendar-container">
+    <h2 class="calendar-title">Ijro topshiriqlari – Kalendar</h2>
+
+    <div class="calendar-header">
+        <button onclick="prevMonth()" class="month-btn">◀</button>
+        <span id="monthYear" class="month-label"></span>
+        <button onclick="nextMonth()" class="month-btn">▶</button>
+    </div>
+
+    <div class="calendar-grid" id="calendarGrid"></div>
 </div>
+
+<style>
+.calendar-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    color: #fff;
+}
+
+.calendar-title {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.month-btn {
+    background: #2e3448;
+    border: 1px solid #3f4b63;
+    padding: 8px 15px;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 18px;
+}
+
+.month-btn:hover {
+    background: #4b6bff;
+}
+
+.month-label {
+    font-size: 22px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.day-box {
+    background: #1c1f2b;
+    padding: 12px;
+    border-radius: 10px;
+    min-height: 110px;
+    border: 1px solid #2e3448;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.day-box:hover {
+    border-color: #4b6bff;
+}
+
+.day-number {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.task-badge {
+    background: #4b6bff;
+    padding: 4px 6px;
+    border-radius: 6px;
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+/* Modal */
+.modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-box {
+    background: #1c1f2b;
+    padding: 25px;
+    border-radius: 12px;
+    width: 400px;
+    color: #fff;
+    border: 1px solid #2e3448;
+}
+
+.modal-close {
+    float: right;
+    cursor: pointer;
+    font-size: 22px;
+}
+
+.modal-task {
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #222634;
+    border-radius: 8px;
+    border: 1px solid #333b52;
+}
+
+</style>
+
+<div class="modal-bg" id="modalBg">
+    <div class="modal-box">
+        <span class="modal-close" onclick="closeModal()">×</span>
+        <h3>Topshiriqlar</h3>
+        <div id="modalTasks"></div>
+    </div>
+</div>
+
+<script>
+const tasks = {{ tasks_json|safe }};  // app.py dan keladigan json
+
+let currentDate = new Date();
+renderCalendar();
+
+function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+
+    document.getElementById("monthYear").innerText =
+        currentDate.toLocaleString("uz-UZ", { month: "long", year: "numeric" });
+
+    let html = "";
+
+    for (let i = 0; i < firstDay; i++) {
+        html += `<div></div>`;
+    }
+
+    for (let day = 1; day <= lastDate; day++) {
+        const fullDate = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+        let dayTasks = tasks.filter(t => t.date === fullDate);
+
+        html += `
+            <div class="day-box" onclick="openModal('${fullDate}')">
+                <div class="day-number">${day}</div>
+                ${dayTasks.map(t => `<span class='task-badge'>${t.title}</span>`).join("")}
+            </div>
+        `;
+    }
+
+    document.getElementById("calendarGrid").innerHTML = html;
+}
+
+function prevMonth() {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+}
+
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+}
+
+function openModal(date) {
+    const dayTasks = tasks.filter(t => t.date === date);
+    let html = "";
+
+    dayTasks.forEach(t => {
+        html += `
+            <div class="modal-task">
+                <b>${t.title}</b><br>
+                ${t.description}
+            </div>
+        `;
+    });
+
+    document.getElementById("modalTasks").innerHTML = html;
+    document.getElementById("modalBg").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("modalBg").style.display = "none";
+}
+</script>
+
 {% endblock %}
