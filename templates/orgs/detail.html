@@ -5,13 +5,35 @@
 <div class="grid-main">
   <div class="column">
     <div class="card-block">
-      <h2>{{ org.name }}</h2>
+      <h2>Asosiy ma'lumotlar</h2>
       <ul class="list">
         <li><b>Xodimlar soni:</b> {{ org.employee_count }}</li>
         <li><b>Manzil:</b> {{ org.address or '—' }}</li>
         <li><b>Qavati:</b> {{ org.floor or '—' }}</li>
         <li><b>Izoh:</b> {{ org.comment or '—' }}</li>
       </ul>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="card-block">
+      <div class="card-header">
+        <h2>Ushbu tashkilotga biriktirilgan transportlar</h2>
+        <a href="{{ url_for('vehicles_list') }}" class="card-link">Barcha transportlar →</a>
+      </div>
+      <div class="vehicle-list">
+        {% for v in org.vehicles %}
+          <div class="vehicle-row" onclick="window.location='{{ url_for('vehicles_detail', vehicle_id=v.id) }}'">
+            <div class="vehicle-img-placeholder">🚗</div>
+            <div class="vehicle-main">
+              <div class="vehicle-title">{{ v.plate_number }} – {{ v.model }}</div>
+              <div class="vehicle-meta">Haydovchi: {{ v.driver_full_name or "Biriktirilmagan" }}</div>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-text">Bu tashkilotga biriktirilgan transport yo'q.</div>
+        {% endfor %}
+      </div>
     </div>
   </div>
 </div>
