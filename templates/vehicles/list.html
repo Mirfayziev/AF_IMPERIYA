@@ -1,39 +1,82 @@
 {% extends "base.html" %}
-{% block page_title %}Avto transportlar{% endblock %}
-{% block header_title %}Avto transportlar{% endblock %}
+{% block header_title %}Transportlar{% endblock %}
 {% block content %}
-<div class="card-block">
-  <div class="card-header">
-    <h2>Avto transportlar ro'yxati</h2>
-    <a href="{{ url_for('vehicles_create') }}" class="card-link">+ Yangi transport</a>
-  </div>
-  <div class="vehicle-list">
-    {% for v in vehicles %}
-    <div class="vehicle-row" onclick="window.location='{{ url_for('vehicles_detail', vehicle_id=v.id) }}'">
-      <div class="vehicle-img-placeholder">
-        {% if v.image_path %}
-          <img src="{{ url_for('static', filename='uploads/' ~ v.image_path) }}" class="vehicle-img">
+
+<div class="page-title">
+  <h1>Avto transportlar</h1>
+  <p class="subtitle">Tizimdagi barcha transport vositalari va haydovchilar</p>
+</div>
+
+{% if session.get("user_role") in ["admin","manager"] %}
+<div style="margin-bottom:15px;">
+  <a href="/vehicles/create" class="btn btn-primary">+ Transport qo‘shish</a>
+</div>
+{% endif %}
+
+<div class="vehicle-grid">
+
+  {% for v in vehicles %}
+  <div class="vehicle-card" onclick="window.location='/vehicles/{{ v.id }}'">
+
+      <div class="vehicle-image-wrap">
+        {% if v.photo %}
+        <img src="{{ url_for('static', filename='uploads/' ~ v.photo) }}">
         {% else %}
-          🚗
+        <img src="{{ url_for('static', filename='img/no_car.jpg') }}">
         {% endif %}
       </div>
-      <div class="vehicle-main">
-        <div class="vehicle-title">{{ v.plate_number }} — {{ v.model }}</div>
-        <div class="vehicle-meta">Haydovchi: {{ v.driver_full_name or "Biriktirilmagan" }}</div>
-        <div class="vehicle-meta">Benzin limiti: <b>{{ v.monthly_fuel_limit }} L</b></div>
+
+      <div class="vehicle-body">
+        <h3>{{ v.model }}</h3>
+        <div class="vehicle-plate">{{ v.plate_number }}</div>
+
         <div class="vehicle-meta">
-          Oxirgi remont: {{ v.last_repair_date or "—" }} ({{ v.last_repair_status or "ma'lumot yo'q" }})
+          <div><b>Haydovchi:</b> {{ v.driver_full_name or "Biriktirilmagan" }}</div>
+          <div><b>Limit:</b> {{ v.monthly_fuel_limit or 0 }} L</div>
+          <div><b>Oxirgi ta’mir:</b> {{ v.last_repair_date or "—" }}</div>
         </div>
       </div>
-      <div class="vehicle-side">
-        <div class="vehicle-badge">
-          {{ v.organization.name if v.organization else "Tashkilot belgilanmagan" }}
-        </div>
-      </div>
-    </div>
-    {% else %}
-      <div class="empty-text">Transportlar hali kiritilmagan.</div>
-    {% endfor %}
+
   </div>
+  {% else %}
+    <div class="empty-text">Transportlar hali kiritilmagan.</div>
+  {% endfor %}
+
 </div>
+
+<style>
+.vehicle-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:15px;
+}
+.vehicle-card{
+    background:#1c1f2b;
+    border-radius:14px;
+    border:1px solid #2e3448;
+    overflow:hidden;
+    cursor:pointer;
+    transition:0.2s;
+}
+.vehicle-card:hover{
+    border-color:#4b6bff;
+    transform:translateY(-2px);
+}
+.vehicle-image-wrap img{
+    width:100%; height:180px; object-fit:cover;
+}
+.vehicle-body{
+    padding:14px;
+}
+.vehicle-plate{
+    margin-top:2px;
+    font-size:14px;
+    opacity:0.8;
+}
+.vehicle-meta div{
+    font-size:13px;
+    margin-top:4px;
+}
+</style>
+
 {% endblock %}
