@@ -1,44 +1,29 @@
 {% extends "base.html" %}
-{% block page_title %}Xodimlar{% endblock %}
-{% block header_title %}Xodimlar ro'yxati{% endblock %}
+{% block header_title %}Xodimlar ro‘yxati{% endblock %}
 {% block content %}
 
-<div class="card-block">
-  <h2>Barcha xodimlar</h2>
+<div class="page-title"><h1>Xodimlar</h1></div>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Login</th>
-        <th>Ism-Familya</th>
-        <th>Hujjatlar</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for u in employees %}
-      <tr>
-        <td>{{ u.username }}</td>
-        <td>
-          {% set p = profiles | selectattr("user_id", "equalto", u.id) | first %}
-          {{ p.full_name if p else "Kiritilmagan" }}
-        </td>
-        <td>
-          {% if p and (p.passport_file or p.diploma_file or p.other_file) %}
-            ✔ Bor
-          {% else %}
-            — Yo‘q
-          {% endif %}
-        </td>
-        <td>
-          <a href="{{ url_for('hr_detail', user_id=u.id) }}" class="btn-primary">Ko‘rish</a>
-        </td>
-      </tr>
-      {% else %}
-      <tr><td colspan="4" class="empty-text">Xodimlar yo'q</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="org-grid">
+
+  {% for u in users %}
+  <div class="org-card" onclick="window.location='/hr/profile/{{ u.id }}'">
+
+      <div class="org-header">
+        <h3>{{ u.full_name }}</h3>
+        <span class="org-count">{{ u.position }}</span>
+      </div>
+
+      <div class="org-body">
+        <div><b>Telefon:</b> {{ u.phone }}</div>
+        <div><b>Manzil:</b> {{ u.address }}</div>
+      </div>
+
+  </div>
+  {% else %}
+    <div class="empty-text">Xodimlar hali kiritilmagan.</div>
+  {% endfor %}
+
 </div>
 
 {% endblock %}
