@@ -405,6 +405,71 @@ with app.app_context():
         changed = True
     if changed:
         db.session.commit()
+# ---------------- HR MODULE ---------------- #
+
+@app.route("/hr")
+@login_required
+@role_required("manager", "admin")
+def hr_panel():
+    employees = User.query.filter_by(role="employee").all()
+    profiles = EmployeeProfile.query.all()
+    return render_template("hr/list.html", employees=employees, profiles=profiles)
+
+
+@app.route("/hr/<int:user_id>")
+@login_required
+@role_required("manager", "admin")
+def hr_detail(user_id):
+    user = User.query.get_or_404(user_id)
+    profile = EmployeeProfile.query.filter_by(user_id=user_id).first()
+    return render_template("hr/detail.html", user=user, profile=profile)
+
+
+@app.route("/employee/profile", methods=["GET", "POST"])
+@login_required
+def hr_edit_self():
+    user_id = session["user_id"]
+    profile = EmployeeProfile.query.filter_by(user_id=user_id).first()
+    if not profile:
+        profile = EmployeeProfile(user_id=user_id)
+        db.session.add(profile)
+        db.session.commit()
+
+    if request.method == "POST":
+        profile.full_name = request.form.get("full_name")
+        profile.passport_info = request.form.get("passport_info")
+        profile.diploma_info = request.form.get("diploma_info")
+        profile.other_docs = request.form.get("other_docs")
+
+        # FILE UPLOAD — passport
+        passport_file = request.files.get("passport_file")
+        if passport_file and passport_file.filename:
+            fname = secure_filename(passport_file.filename)
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], fname)
+            passport_file.save(save_path)
+            profile.passport_file = fname
+
+        # diploma
+        diploma_file = request.files.get("diploma_file")
+        if diploma_file and diploma_file.filename:
+            fname = secure_filename(diploma_file.filename)
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], fname)
+            diploma_file.save(save_path)
+            profile.diploma_file = fname
+
+        # other
+        other_file = request.files.get("other_file")
+        if other_file and other_file.filename:
+            fname = secure_filename(other_file.filename)
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], fname)
+            other_file.save(save_path)
+            profile.other_file = fname
+
+        db.session.commit()
+        flash("Ma'lumotlar saqlandi", "success")
+        return redirect(url_for("hr_edit_self"))
+
+    return render_template("hr/edit_self.html", profile=profile)
 
 if __name__ == "__main__":
     app.run(debug=True)
