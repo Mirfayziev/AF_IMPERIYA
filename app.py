@@ -1,94 +1,84 @@
 import os
-from datetime import date, datetime
+import json
+from datetime import datetime, date, timedelta
+from functools import wraps
 
-from flask import (
-    Flask, render_template, redirect, url_for,
-    request, session, flash, send_from_directory
-)
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
+from sqlalchemy import func
 
-from config import Config
-from models import (
-    db, User, Task, Vehicle, Organization, OutsourceCompany,
-    OrgTech, Contract, SolarSite, EmployeeProfile, IjroTask
-)
+from models import db, User, HRDocument, Organization, Vehicle, OrgTech, OutsourceCompany, SolarSite, SolarReading, IjroTask
 
 app = Flask(__name__)
-app.config.from_object(Config)
-db.init_app(app)
+
+app.config["SECRET_KEY"] = "super-secret-af-imperiya"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+db.init_app(app)
 
 
-# ------- helpers --------
-@app.context_processor
-def inject_today():
-    return {"today": date.today()}
+# ---------- HELPERS ----------
 
-
-def login_required(fn):
-    from functools import wraps
-
-    @wraps(fn)
+def login_required(f):
+    @wraps(f)
     def wrapper(*args, **kwargs):
         if "user_id" not in session:
             return redirect(url_for("login"))
-        return fn(*args, **kwargs)
-
+        return f(*args, **kwargs)
     return wrapper
 
 
-def role_required(*roles):
-    from functools import wraps
-
-    def decorator(fn):
-        @wraps(fn)
-        def wrapper(*args, **kwargs):
-            if "user_id" not in session:
-                return redirect(url_for("login"))
-            if session.get("user_role") not in roles:
-                flash("Bu bo'limga kirish huquqi yo'q", "danger")
-                return redirect(url_for("index"))
-            return fn(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
+# ---------- INIT DB & DEFAULT ADMIN ----------
+@app.before_first_request
+def init_db():
+    db.create_all()
+    if not User.query.filter_by(username="admin").first():
+        admin = User(
+            username="admin",
+            password="admin",
+            role="admin",
+            full_name="Super Admin"
+        )
+        db.session.add(admin)
+        db.session.commit()
 
 
-@app.route("/favicon.ico")
-def favicon():
-    return send_from_directory(
-        os.path.join(app.root_path, "static", "img"), "logo_af.png"
-    )
+# ---------- LOGIN ----------
 
-
-# -------- auth ----------
-@app.route("/")
+@app.route("/", methods=["GET"])
 def index():
-    role = session.get("user_role")
-    if role == "manager":
-        return redirect(url_for("manager_dashboard"))
-    if role == "admin":
-        return redirect(url_for("admin_panel"))
-    if role == "employee":
-        return redirect(url_for("employee_panel"))
+    if "user_id" in session:
+        if session.get("user_role") == "admin":
+            return redirect(url_for("admin_dashboard"))
+        elif session.get("user_role") == "manager":
+            return redirect(url_for("admin_dashboard"))
+        else:
+            return redirect(url_for("employee_dashboard"))
     return redirect(url_for("login"))
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
+        username = request.form.get("username")
+        password = request.form.get("password")
         user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password_hash, password):
+        if user and user.password == password:
             session["user_id"] = user.id
+            session["username"] = user.username
             session["user_role"] = user.role
-            return redirect(url_for("index"))
-        flash("Login yoki parol noto'g'ri", "danger")
-    return render_template("auth/login.html")
+            if user.role == "admin":
+                return redirect(url_for("admin_dashboard"))
+            elif user.role == "manager":
+                return redirect(url_for("admin_dashboard"))
+            else:
+                return redirect(url_for("employee_dashboard"))
+    # login.html oldin bergan dizayn bilan
+    now = datetime.now()
+    return render_template("login.html", now=now)
 
 
 @app.route("/logout")
@@ -97,379 +87,474 @@ def logout():
     return redirect(url_for("login"))
 
 
-# -------- Rahbar paneli (dashboard) ----------
-@app.route("/manager/dashboard")
-@login_required
-@role_required("manager", "admin")
-def manager_dashboard():
-    tasks = Task.query.order_by(Task.due_date.asc().nullslast()).all()
-    new_tasks = Task.query.filter_by(status="new").count()
-    in_progress = Task.query.filter_by(status="in_progress").count()
-    done_tasks = Task.query.filter_by(status="done").count()
+# ---------- ADMIN DASHBOARD ----------
 
-    vehicles = Vehicle.query.limit(4).all()
-    contracts = Contract.query.order_by(Contract.created_at.desc()).limit(5).all()
-    outsourcing_companies = OutsourceCompany.query.order_by(
-        OutsourceCompany.id.desc()
-    ).limit(3).all()
-    total_contract_amount = db.session.query(
-        db.func.coalesce(db.func.sum(Contract.amount), 0)
+@app.route("/admin/dashboard")
+@login_required
+def admin_dashboard():
+    if session.get("user_role") not in ["admin", "manager"]:
+        return redirect(url_for("login"))
+
+    total_employees = User.query.filter_by(role="employee").count()
+    active_tasks = IjroTask.query.filter(IjroTask.status != "done").count()
+    vehicles_count = Vehicle.query.count()
+    outsource_count = OutsourceCompany.query.count()
+    solar_today = db.session.query(func.coalesce(func.sum(SolarReading.energy_kwh), 0)).filter(
+        SolarReading.date == date.today()
     ).scalar()
-    active_employees = User.query.filter_by(role="employee").count()
+
+    task_status_data = {
+        "labels": ["new", "in_progress", "done"],
+        "values": [
+            IjroTask.query.filter_by(status="new").count(),
+            IjroTask.query.filter_by(status="in_progress").count(),
+            IjroTask.query.filter_by(status="done").count(),
+        ],
+    }
+
+    today = date.today()
+    solar_labels = []
+    solar_values = []
+    for i in range(6, -1, -1):
+        d = today - timedelta(days=i)
+        solar_labels.append(d.isoformat())
+        total_kwh = db.session.query(func.coalesce(func.sum(SolarReading.energy_kwh), 0)).filter(
+            SolarReading.date == d
+        ).scalar()
+        solar_values.append(float(total_kwh or 0))
+
+    ijro_monthly_data = {
+        "labels": [],
+        "values": [],
+    }
 
     return render_template(
-        "manager/dashboard.html",
-        tasks=tasks,
-        new_tasks=new_tasks,
-        in_progress=in_progress,
-        done_tasks=done_tasks,
-        vehicles=vehicles,
-        contracts=contracts,
-        outsourcing_companies=outsourcing_companies,
-        total_contract_amount=total_contract_amount,
-        active_employees=active_employees,
+        "admin/dashboard.html",
+        total_employees=total_employees,
+        active_tasks=active_tasks,
+        vehicles_count=vehicles_count,
+        outsource_count=outsource_count,
+        solar_today_kwh=solar_today or 0,
+        task_status_data=json.dumps(task_status_data),
+        ijro_monthly_data=json.dumps(ijro_monthly_data),
+        solar_weekly_data=json.dumps(
+            {"labels": solar_labels, "values": solar_values}
+        ),
     )
 
 
-# ---------- Avtotransportlar (FULL CRUD) ----------
+# ---------- EMPLOYEE DASHBOARD ----------
+
+@app.route("/employee/dashboard")
+@login_required
+def employee_dashboard():
+    if session.get("user_role") != "employee":
+        return redirect(url_for("login"))
+
+    user_id = session.get("user_id")
+    u = User.query.get_or_404(user_id)
+
+    today = date.today()
+    tasks_today = IjroTask.query.filter(
+        IjroTask.assigned_to_id == user_id,
+        IjroTask.date == today,
+    ).all()
+    today_tasks = len(tasks_today)
+
+    new_tasks = IjroTask.query.filter_by(
+        assigned_to_id=user_id, status="new"
+    ).count()
+    completed_tasks = IjroTask.query.filter_by(
+        assigned_to_id=user_id, status="done"
+    ).count()
+
+    employee_modules = ["ijro", "vehicles", "orgtech", "hr"]
+
+    mini_calendar = "Kalendar tez orada to‘liq integratsiya qilinadi."
+
+    return render_template(
+        "employee/dashboard.html",
+        today_tasks=today_tasks,
+        new_tasks=new_tasks,
+        completed_tasks=completed_tasks,
+        employee_modules=employee_modules,
+        today_task_list=tasks_today,
+        mini_calendar=mini_calendar,
+    )
+
+
+# ---------- VEHICLES ----------
+
 @app.route("/vehicles")
 @login_required
-def vehicles_list():
-    vehicles = Vehicle.query.order_by(Vehicle.id.desc()).all()
+def vehicle_list():
+    vehicles = Vehicle.query.all()
     return render_template("vehicles/list.html", vehicles=vehicles)
 
 
 @app.route("/vehicles/create", methods=["GET", "POST"])
 @login_required
-def vehicles_create():
-    orgs = Organization.query.order_by(Organization.name).all()
-    if request.method == "POST":
-        plate = request.form.get("plate_number")
-        model = request.form.get("model")
-        driver = request.form.get("driver_full_name")
-        limit = float(request.form.get("monthly_fuel_limit") or 0)
-        last_rep_date = request.form.get("last_repair_date") or None
-        last_rep_status = request.form.get("last_repair_status")
-        org_id = request.form.get("organization_id") or None
+def vehicle_create():
+    if session.get("user_role") not in ["admin", "manager"]:
+        return redirect(url_for("vehicle_list"))
 
-        image_file = request.files.get("image")
-        image_path = None
-        if image_file and image_file.filename:
-            filename = secure_filename(image_file.filename)
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-            image_file.save(save_path)
-            image_path = filename
+    if request.method == "POST":
+        model = request.form.get("model")
+        plate = request.form.get("plate_number")
+        driver = request.form.get("driver_full_name")
+        limit = request.form.get("monthly_fuel_limit") or 0
+        repair = request.form.get("last_repair_date")
+
+        file = request.files.get("photo")
+        filename = None
+        if file and file.filename:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
         v = Vehicle(
-            plate_number=plate,
             model=model,
+            plate_number=plate,
             driver_full_name=driver,
-            monthly_fuel_limit=limit,
-            last_repair_date=datetime.strptime(last_rep_date, "%Y-%m-%d").date()
-            if last_rep_date
-            else None,
-            last_repair_status=last_rep_status,
-            organization_id=int(org_id) if org_id else None,
-            image_path=image_path,
+            monthly_fuel_limit=int(limit),
+            last_repair_date=repair,
+            photo=filename,
         )
         db.session.add(v)
         db.session.commit()
-        flash("Transport qo'shildi", "success")
-        return redirect(url_for("vehicles_list"))
-    return render_template("vehicles/form.html", v=None, orgs=orgs)
+        return redirect(url_for("vehicle_list"))
+
+    return render_template("vehicles/create.html")
 
 
 @app.route("/vehicles/<int:vehicle_id>")
 @login_required
-def vehicles_detail(vehicle_id):
+def vehicle_details(vehicle_id):
     v = Vehicle.query.get_or_404(vehicle_id)
-    return render_template("vehicles/detail.html", v=v)
+    return render_template("vehicles/details.html", vehicle=v)
 
 
-@app.route("/vehicles/<int:vehicle_id>/edit", methods=["GET", "POST"])
+# ---------- ORGTECH ----------
+
+@app.route("/orgtech")
 @login_required
-def vehicles_edit(vehicle_id):
-    v = Vehicle.query.get_or_404(vehicle_id)
-    orgs = Organization.query.order_by(Organization.name).all()
+def orgtech_list():
+    items = OrgTech.query.all()
+    return render_template("orgtech/list.html", items=items)
+
+
+@app.route("/orgtech/create", methods=["GET", "POST"])
+@login_required
+def orgtech_create():
+    if session.get("user_role") not in ["admin", "manager"]:
+        return redirect(url_for("orgtech_list"))
+
+    users = User.query.all()
     if request.method == "POST":
-        v.plate_number = request.form.get("plate_number")
-        v.model = request.form.get("model")
-        v.driver_full_name = request.form.get("driver_full_name")
-        v.monthly_fuel_limit = float(request.form.get("monthly_fuel_limit") or 0)
-        last_rep_date = request.form.get("last_repair_date") or None
-        v.last_repair_date = (
-            datetime.strptime(last_rep_date, "%Y-%m-%d").date()
-            if last_rep_date
-            else None
+        t = OrgTech(
+            name=request.form.get("name"),
+            model=request.form.get("model"),
+            serial_number=request.form.get("serial_number"),
+            status=request.form.get("status"),
+            comment=request.form.get("comment"),
         )
-        v.last_repair_status = request.form.get("last_repair_status")
-        org_id = request.form.get("organization_id") or None
-        v.organization_id = int(org_id) if org_id else None
-
-        image_file = request.files.get("image")
-        if image_file and image_file.filename:
-            filename = secure_filename(image_file.filename)
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-            image_file.save(save_path)
-            v.image_path = filename
-
+        assigned_id = request.form.get("assigned_to")
+        if assigned_id:
+            t.assigned_to_id = int(assigned_id)
+        db.session.add(t)
         db.session.commit()
-        flash("Transport yangilandi", "success")
-        return redirect(url_for("vehicles_detail", vehicle_id=v.id))
+        return redirect(url_for("orgtech_list"))
 
-    return render_template("vehicles/form.html", v=v, orgs=orgs)
+    return render_template("orgtech/create.html", users=users)
 
 
-@app.route("/vehicles/<int:vehicle_id>/delete", methods=["POST"])
+@app.route("/orgtech/<int:item_id>")
 @login_required
-def vehicles_delete(vehicle_id):
-    v = Vehicle.query.get_or_404(vehicle_id)
-    db.session.delete(v)
-    db.session.commit()
-    flash("Transport o'chirildi", "success")
-    return redirect(url_for("vehicles_list"))
+def orgtech_details(item_id):
+    item = OrgTech.query.get_or_404(item_id)
+    return render_template("orgtech/details.html", item=item)
 
 
-# ---------- Tizim tashkilotlari ----------
+# ---------- ORGANIZATIONS ----------
+
 @app.route("/organizations")
 @login_required
-def orgs_list():
-    orgs = Organization.query.order_by(Organization.name).all()
-    return render_template("orgs/list.html", orgs=orgs)
+def organizations_list():
+    organizations = Organization.query.all()
+    return render_template("organizations/list.html", organizations=organizations)
 
 
 @app.route("/organizations/create", methods=["GET", "POST"])
 @login_required
-def orgs_create():
+def organizations_create():
+    if session.get("user_role") not in ["admin", "manager"]:
+        return redirect(url_for("organizations_list"))
+
     if request.method == "POST":
-        o = Organization(
+        org = Organization(
             name=request.form.get("name"),
-            employee_count=int(request.form.get("employee_count") or 0),
+            employee_count=request.form.get("employee_count") or 0,
             address=request.form.get("address"),
             floor=request.form.get("floor"),
             comment=request.form.get("comment"),
         )
-        db.session.add(o)
+        db.session.add(org)
         db.session.commit()
-        flash("Tizim tashkiloti qo'shildi", "success")
-        return redirect(url_for("orgs_list"))
-    return render_template("orgs/form.html", org=None)
+        return redirect(url_for("organizations_list"))
+
+    return render_template("organizations/create.html")
 
 
-@app.route("/organizations/<int:org_id>", methods=["GET", "POST"])
+@app.route("/organizations/<int:org_id>")
 @login_required
-def orgs_detail(org_id):
+def organizations_details(org_id):
     org = Organization.query.get_or_404(org_id)
-    # shu yerda keyin xodimlar va boshqa bog'lanishlarni ham qo'shamiz
-    return render_template("orgs/detail.html", org=org)
+    return render_template("organizations/details.html", org=org)
 
 
-# ---------- Ijro moduli (soddalashtirilgan kalendar) ----------
-@app.route("/ijro", methods=["GET", "POST"])
-@login_required
-def ijro_panel():
-    # filter: sana bo'yicha
-    selected_date = request.args.get("date")
-    q = IjroTask.query
-    if selected_date:
-        try:
-            d = datetime.strptime(selected_date, "%Y-%m-%d").date()
-            q = q.filter(IjroTask.date == d)
-        except ValueError:
-            pass
-    tasks = q.order_by(IjroTask.date.asc()).all()
-
-    return render_template("ijro/list.html", tasks=tasks, selected_date=selected_date)
-
-
-@app.route("/ijro/create", methods=["GET", "POST"])
-@login_required
-@role_required("manager", "admin")
-def ijro_create():
-    employees = User.query.filter_by(role="employee").all()
-    if request.method == "POST":
-        title = request.form.get("title")
-        desc = request.form.get("description")
-        date_str = request.form.get("date")
-        due_str = request.form.get("due_date")
-        assigned_id = request.form.get("assigned_to_id") or None
-        d = datetime.strptime(date_str, "%Y-%m-%d").date() if date_str else date.today()
-        dd = datetime.strptime(due_str, "%Y-%m-%d").date() if due_str else None
-
-        t = IjroTask(
-            title=title,
-            description=desc,
-            date=d,
-            due_date=dd,
-            assigned_to_id=int(assigned_id) if assigned_id else None,
-        )
-        db.session.add(t)
-        db.session.commit()
-        flash("Ijro topshirig'i yaratildi", "success")
-        return redirect(url_for("ijro_panel"))
-
-    return render_template("ijro/form.html", employees=employees)
-
-
-@app.route("/ijro/<int:task_id>/done", methods=["POST"])
-@login_required
-def ijro_mark_done(task_id):
-    task = IjroTask.query.get_or_404(task_id)
-    task.status = "done"
-    db.session.commit()
-    flash("Topshiriq bajarildi deb belgilandi", "success")
-    return redirect(url_for("ijro_panel"))
-
-
-# ---------- Admin / Employee / boshqa modullar (placeholder) ----------
-@app.route("/admin/panel")
-@login_required
-@role_required("admin")
-def admin_panel():
-    return render_template("admin/dashboard.html")
-
-
-@app.route("/employee/panel")
-@login_required
-@role_required("employee", "manager", "admin")
-def employee_panel():
-    return render_template("employee/dashboard.html")
-
+# ---------- OUTSOURSING ----------
 
 @app.route("/outsourcing")
 @login_required
-def outsourcing_panel():
+def outsourcing_list():
     companies = OutsourceCompany.query.all()
     return render_template("outsourcing/list.html", companies=companies)
 
 
-@app.route("/orgtech")
+@app.route("/outsourcing/create", methods=["GET", "POST"])
 @login_required
-def orgtech_panel():
-    devices = OrgTech.query.all()
-    return render_template("orgtech/list.html", devices=devices)
+def outsourcing_create():
+    if session.get("user_role") not in ["admin", "manager"]:
+        return redirect(url_for("outsourcing_list"))
+
+    if request.method == "POST":
+        from datetime import datetime as dt
+
+        date_str = request.form.get("contract_date")
+        cdate = None
+        if date_str:
+            try:
+                cdate = dt.strptime(date_str, "%Y-%m-%d").date()
+            except Exception:
+                cdate = None
+
+        comp = OutsourceCompany(
+            name=request.form.get("name"),
+            service_type=request.form.get("service_type"),
+            contract_number=request.form.get("contract_number"),
+            contract_date=cdate,
+            contract_amount=float(request.form.get("contract_amount") or 0),
+            comment=request.form.get("comment"),
+        )
+        db.session.add(comp)
+        db.session.commit()
+        return redirect(url_for("outsourcing_list"))
+
+    return render_template("outsourcing/create.html")
 
 
-@app.route("/contracts")
+@app.route("/outsourcing/<int:company_id>")
 @login_required
-def contracts_list():
-    contracts = Contract.query.order_by(Contract.created_at.desc()).all()
-    return render_template("contracts/list.html", contracts=contracts)
+def outsourcing_details(company_id):
+    company = OutsourceCompany.query.get_or_404(company_id)
+    return render_template("outsourcing/details.html", company=company)
 
 
-@app.route("/hr")
-@login_required
-def hr_panel():
-    employees = User.query.filter_by(role="employee").all()
-    profiles = EmployeeProfile.query.all()
-    return render_template("hr/users.html", employees=employees, profiles=profiles)
-
+# ---------- SOLAR ----------
 
 @app.route("/solar")
 @login_required
-def solar_panel():
+def solar_dashboard():
     sites = SolarSite.query.all()
-    return render_template("solar/dashboard.html", sites=sites)
+    total_power_kw = sum(s.last_power_kw or 0 for s in sites)
+    total_energy_today_kwh = sum(s.last_energy_today_kwh or 0 for s in sites)
+
+    today = date.today()
+    labels = []
+    values = []
+    for i in range(6, -1, -1):
+        d = today - timedelta(days=i)
+        labels.append(d.isoformat())
+        total_kwh = db.session.query(func.coalesce(func.sum(SolarReading.energy_kwh), 0)).filter(
+            SolarReading.date == d
+        ).scalar()
+        values.append(float(total_kwh or 0))
+
+    return render_template(
+        "solar/dashboard.html",
+        sites=sites,
+        total_power_kw=total_power_kw,
+        total_energy_today_kwh=total_energy_today_kwh,
+        chart_labels=json.dumps(labels),
+        chart_values=json.dumps(values),
+    )
 
 
-# ---------- DB init ----------
-with app.app_context():
-    db.create_all()
-    changed = False
-    if not User.query.filter_by(username="admin").first():
-        db.session.add(
-            User(
-                username="admin",
-                password_hash=generate_password_hash("admin123"),
-                role="admin",
-            )
-        )
-        changed = True
-    if not User.query.filter_by(username="manager").first():
-        db.session.add(
-            User(
-                username="manager",
-                password_hash=generate_password_hash("manager123"),
-                role="manager",
-            )
-        )
-        changed = True
-    if not User.query.filter_by(username="employee").first():
-        db.session.add(
-            User(
-                username="employee",
-                password_hash=generate_password_hash("employee123"),
-                role="employee",
-            )
-        )
-        changed = True
-    if changed:
-        db.session.commit()
-# ---------------- HR MODULE ---------------- #
-
-@app.route("/hr")
+@app.route("/solar/<int:site_id>")
 @login_required
-@role_required("manager", "admin")
-def hr_panel():
+def solar_detail(site_id):
+    site = SolarSite.query.get_or_404(site_id)
+    readings = (
+        SolarReading.query.filter_by(site_id=site.id)
+        .order_by(SolarReading.date.desc())
+        .limit(14)
+        .all()
+    )
+    readings = list(reversed(readings))
+    labels = [r.date.isoformat() for r in readings]
+    values = [float(r.energy_kwh or 0) for r in readings]
+
+    return render_template(
+        "solar/site_detail.html",
+        site=site,
+        readings=readings,
+        chart_labels=json.dumps(labels),
+        chart_values=json.dumps(values),
+    )
+
+
+# ---------- IJRO ----------
+
+@app.route("/ijro")
+@login_required
+def ijro_list():
+    tasks = IjroTask.query.order_by(IjroTask.date.asc()).all()
+    return render_template("ijro/list.html", tasks=tasks)
+
+
+@app.route("/ijro/create", methods=["GET", "POST"])
+@login_required
+def ijro_create():
+    if session.get("user_role") not in ["admin", "manager"]:
+        return redirect(url_for("ijro_list"))
+
     employees = User.query.filter_by(role="employee").all()
-    profiles = EmployeeProfile.query.all()
-    return render_template("hr/list.html", employees=employees, profiles=profiles)
+    if request.method == "POST":
+        from datetime import datetime as dt
 
+        title = request.form.get("title")
+        desc = request.form.get("description")
+        due = request.form.get("due_date")
+        assigned = request.form.get("assigned_to")
 
-@app.route("/hr/<int:user_id>")
-@login_required
-@role_required("manager", "admin")
-def hr_detail(user_id):
-    user = User.query.get_or_404(user_id)
-    profile = EmployeeProfile.query.filter_by(user_id=user_id).first()
-    return render_template("hr/detail.html", user=user, profile=profile)
+        today = date.today()
+        d_due = None
+        if due:
+            try:
+                d_due = dt.strptime(due, "%Y-%m-%d").date()
+            except Exception:
+                d_due = None
 
-
-@app.route("/employee/profile", methods=["GET", "POST"])
-@login_required
-def hr_edit_self():
-    user_id = session["user_id"]
-    profile = EmployeeProfile.query.filter_by(user_id=user_id).first()
-    if not profile:
-        profile = EmployeeProfile(user_id=user_id)
-        db.session.add(profile)
+        task = IjroTask(
+            title=title,
+            description=desc,
+            date=today,
+            due_date=d_due,
+            status="new",
+        )
+        if assigned:
+            task.assigned_to_id = int(assigned)
+        db.session.add(task)
         db.session.commit()
+        return redirect(url_for("ijro_list"))
+
+    return render_template("ijro/create.html", employees=employees)
+
+
+@app.route("/ijro/done/<int:task_id>")
+@login_required
+def ijro_done(task_id):
+    t = IjroTask.query.get_or_404(task_id)
+    # faqat xuddi o'ziga tegishli bo'lsa yoki admin/manager bo‘lsa
+    if session.get("user_role") == "employee" and t.assigned_to_id != session.get("user_id"):
+        return redirect(url_for("ijro_list"))
+    t.status = "done"
+    db.session.commit()
+    return redirect(url_for("ijro_list"))
+
+
+@app.route("/ijro/calendar")
+@login_required
+def ijro_calendar():
+    tasks = IjroTask.query.all()
+    tasks_json = [
+        {
+            "title": t.title,
+            "description": t.description or "",
+            "date": t.date.isoformat() if t.date else "",
+            "due_date": t.due_date.isoformat() if t.due_date else "",
+            "status": t.status or "new",
+        }
+        for t in tasks
+    ]
+    return render_template("ijro/calendar.html", tasks_json=json.dumps(tasks_json))
+
+
+# ---------- HR ----------
+
+@app.route("/hr/list")
+@login_required
+def hr_list():
+    if session.get("user_role") not in ["admin", "manager"]:
+        return redirect(url_for("login"))
+    users = User.query.filter(User.role != "admin").all()
+    return render_template("hr/list.html", users=users)
+
+
+@app.route("/hr/profile/<int:user_id>")
+@login_required
+def hr_profile(user_id):
+    # Employee o‘zi faqat o‘z profilini ko‘radi
+    if session.get("user_role") == "employee" and session.get("user_id") != user_id:
+        return redirect(url_for("employee_dashboard"))
+    u = User.query.get_or_404(user_id)
+    return render_template("hr/profile.html", user=u)
+
+
+@app.route("/hr/edit/<int:user_id>", methods=["GET", "POST"])
+@login_required
+def hr_edit(user_id):
+    if session.get("user_role") not in ["admin", "manager"]:
+        return redirect(url_for("login"))
+
+    u = User.query.get_or_404(user_id)
 
     if request.method == "POST":
-        profile.full_name = request.form.get("full_name")
-        profile.passport_info = request.form.get("passport_info")
-        profile.diploma_info = request.form.get("diploma_info")
-        profile.other_docs = request.form.get("other_docs")
+        u.full_name = request.form.get("full_name")
+        u.position = request.form.get("position")
+        u.phone = request.form.get("phone")
+        u.address = request.form.get("address")
+        u.birth_date = request.form.get("birth_date")
 
-        # FILE UPLOAD — passport
-        passport_file = request.files.get("passport_file")
-        if passport_file and passport_file.filename:
-            fname = secure_filename(passport_file.filename)
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], fname)
-            passport_file.save(save_path)
-            profile.passport_file = fname
+        u.passport_series = request.form.get("passport_series")
+        u.passport_number = request.form.get("passport_number")
+        u.passport_given_date = request.form.get("passport_given_date")
+        u.passport_given_by = request.form.get("passport_given_by")
 
-        # diploma
-        diploma_file = request.files.get("diploma_file")
-        if diploma_file and diploma_file.filename:
-            fname = secure_filename(diploma_file.filename)
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], fname)
-            diploma_file.save(save_path)
-            profile.diploma_file = fname
+        u.diploma_type = request.form.get("diploma_type")
+        u.diploma_from = request.form.get("diploma_from")
+        u.diploma_year = request.form.get("diploma_year")
 
-        # other
-        other_file = request.files.get("other_file")
-        if other_file and other_file.filename:
-            fname = secure_filename(other_file.filename)
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], fname)
-            other_file.save(save_path)
-            profile.other_file = fname
+        photo = request.files.get("photo")
+        if photo and photo.filename:
+            filename = secure_filename(photo.filename)
+            photo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            u.photo = filename
+
+        docs_files = request.files.getlist("docs")
+        for f in docs_files:
+            if f and f.filename:
+                fname = secure_filename(f.filename)
+                f.save(os.path.join(app.config["UPLOAD_FOLDER"], fname))
+                doc = HRDocument(filename=fname, owner=u)
+                db.session.add(doc)
 
         db.session.commit()
-        flash("Ma'lumotlar saqlandi", "success")
-        return redirect(url_for("hr_edit_self"))
+        return redirect(url_for("hr_profile", user_id=user_id))
 
-    return render_template("hr/edit_self.html", profile=profile)
+    return render_template("hr/edit.html", user=u)
+
+
+# ---------- MAIN ----------
 
 if __name__ == "__main__":
     app.run(debug=True)
