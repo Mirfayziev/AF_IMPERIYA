@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card big-card">
+
+    <h2>Yangi outsorsing kompaniyasi</h2>
+
+    <form method="post">
+
+        <label>Kompaniya nomi</label>
+        <input type="text" name="name" required>
+
+        <label>Xizmat turi</label>
+        <input type="text" name="service_type">
+
+        <label>Shartnoma raqami</label>
+        <input type="text" name="contract_number">
+
+        <label>Shartnoma sanasi</label>
+        <input type="date" name="contract_date">
+
+        <label>Shartnoma summasi (so‘m)</label>
+        <input type="number" step="0.01" name="contract_amount">
+
+        <label>Izoh</label>
+        <textarea name="comment" rows="3"></textarea>
+
+        <button class="btn btn-primary" style="margin-top:15px;">Saqlash</button>
+
+    </form>
+
+</div>
+
+<style>
+.big-card{
+    padding:25px;
+    max-width:600px;
+    margin:auto;
+}
+input, textarea {
+    width:100%;
+    background:#222634;
+    border:1px solid #2e3448;
+    color:#fff;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:12px;
+}
+</style>
+
+{% endblock %}
