@@ -3,24 +3,34 @@
 
 <div class="card big-card">
 
-    <h2>Yangi outsorsing kompaniyasi</h2>
+    <h2>Yangi texnika qo‘shish</h2>
 
     <form method="post">
 
-        <label>Kompaniya nomi</label>
+        <label>Texnika nomi</label>
         <input type="text" name="name" required>
 
-        <label>Xizmat turi</label>
-        <input type="text" name="service_type">
+        <label>Model</label>
+        <input type="text" name="model">
 
-        <label>Shartnoma raqami</label>
-        <input type="text" name="contract_number">
+        <label>Serial raqam</label>
+        <input type="text" name="serial_number">
 
-        <label>Shartnoma sanasi</label>
-        <input type="date" name="contract_date">
+        <label>Status</label>
+        <select name="status">
+            <option value="new">Yangi</option>
+            <option value="working">Ishlayapti</option>
+            <option value="repair">Ta’mirda</option>
+            <option value="broken">Yaroqsiz</option>
+        </select>
 
-        <label>Shartnoma summasi (so‘m)</label>
-        <input type="number" step="0.01" name="contract_amount">
+        <label>Xodimga biriktirish</label>
+        <select name="assigned_to">
+            <option value="">Tanlanmagan</option>
+            {% for u in users %}
+                <option value="{{ u.id }}">{{ u.username }}</option>
+            {% endfor %}
+        </select>
 
         <label>Izoh</label>
         <textarea name="comment" rows="3"></textarea>
@@ -37,7 +47,7 @@
     max-width:600px;
     margin:auto;
 }
-input, textarea {
+input,textarea,select{
     width:100%;
     background:#222634;
     border:1px solid #2e3448;
