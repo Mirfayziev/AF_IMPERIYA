@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>{% block page_title %}AI Imperiya{% endblock %}</title>
+    <title>{% block page_title %}AF Imperiya{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
@@ -17,31 +17,78 @@
             </div>
             <div class="user-info">
                 <div class="user-name">AF Imperiya</div>
+                {% set role = session.get('user_role') %}
                 <div class="user-role">
-                    {% if session.get('user_role') == 'manager' %}Rahbar paneli{% elif session.get('user_role') == 'admin' %}Admin paneli{% else %}Xodim paneli{% endif %}
+                    {% if role == 'manager' %}Rahbar paneli{% elif role == 'admin' %}Admin paneli{% else %}Xodim paneli{% endif %}
                 </div>
             </div>
         </div>
 
+        {% set role = session.get('user_role') %}
+
         <nav class="sidebar-menu">
-            <a href="{{ url_for('manager_dashboard') }}" class="menu-item{% if request.endpoint=='manager_dashboard' %} active{% endif %}">
-                <span class="menu-icon">📊</span><span class="menu-text">Topshiriqlar</span>
-            </a>
-            <a href="#" class="menu-item">
-                <span class="menu-icon">🚗</span><span class="menu-text">Avtotransportlar</span>
-            </a>
-            <a href="#" class="menu-item">
-                <span class="menu-icon">📄</span><span class="menu-text">Shartnomalar</span>
-            </a>
-            <a href="#" class="menu-item">
-                <span class="menu-icon">🤝</span><span class="menu-text">Outsorsing</span>
-            </a>
-            <a href="#" class="menu-item">
-                <span class="menu-icon">🖨</span><span class="menu-text">Orgtexnika</span>
-            </a>
-            <a href="#" class="menu-item">
-                <span class="menu-icon">🏢</span><span class="menu-text">Tizim tashkilotlar</span>
-            </a>
+            {% if role in ['manager', 'admin'] %}
+                <a href="{{ url_for('manager_dashboard') }}" class="menu-item{% if request.endpoint == 'manager_dashboard' %} active{% endif %}">
+                    <span class="menu-icon">📊</span><span class="menu-text">Topshiriqlar</span>
+                </a>
+            {% endif %}
+
+            {% if role in ['manager', 'admin'] %}
+                <a href="{{ url_for('vehicles_list') }}" class="menu-item{% if 'vehicles_' in request.endpoint or request.endpoint == 'vehicles_list' %} active{% endif %}">
+                    <span class="menu-icon">🚗</span><span class="menu-text">Avtotransportlar</span>
+                </a>
+            {% endif %}
+
+            {% if role in ['manager', 'admin'] %}
+                <a href="{{ url_for('contracts_list') }}" class="menu-item{% if request.endpoint == 'contracts_list' %} active{% endif %}">
+                    <span class="menu-icon">📄</span><span class="menu-text">Shartnomalar</span>
+                </a>
+            {% endif %}
+
+            {% if role in ['manager', 'admin'] %}
+                <a href="{{ url_for('outsourcing_panel') }}" class="menu-item{% if request.endpoint == 'outsourcing_panel' %} active{% endif %}">
+                    <span class="menu-icon">🤝</span><span class="menu-text">Outsorsing</span>
+                </a>
+            {% endif %}
+
+            {% if role in ['manager', 'admin'] %}
+                <a href="{{ url_for('orgtech_panel') }}" class="menu-item{% if request.endpoint == 'orgtech_panel' %} active{% endif %}">
+                    <span class="menu-icon">🖨</span><span class="menu-text">Orgtexnika</span>
+                </a>
+            {% endif %}
+
+            {% if role in ['manager', 'admin'] %}
+                <a href="{{ url_for('orgs_list') }}" class="menu-item{% if request.endpoint.startswith('orgs_') %} active{% endif %}">
+                    <span class="menu-icon">🏢</span><span class="menu-text">Tizim tashkilotlar</span>
+                </a>
+            {% endif %}
+
+            {% if role in ['manager', 'admin'] %}
+                <a href="{{ url_for('ijro_panel') }}" class="menu-item{% if request.endpoint == 'ijro_panel' or request.endpoint=='ijro_create' %} active{% endif %}">
+                    <span class="menu-icon">📅</span><span class="menu-text">Ijro</span>
+                </a>
+            {% endif %}
+
+            {% if role in ['manager', 'admin'] %}
+                <a href="{{ url_for('solar_panel') }}" class="menu-item{% if request.endpoint == 'solar_panel' %} active{% endif %}">
+                    <span class="menu-icon">☀</span><span class="menu-text">Solar</span>
+                </a>
+            {% endif %}
+
+            {% if role in ['manager', 'admin'] %}
+                <a href="{{ url_for('hr_panel') }}" class="menu-item{% if request.endpoint == 'hr_panel' %} active{% endif %}">
+                    <span class="menu-icon">👥</span><span class="menu-text">Xodimlar</span>
+                </a>
+            {% endif %}
+
+            {% if role == 'employee' %}
+                <a href="{{ url_for('employee_panel') }}" class="menu-item{% if request.endpoint == 'employee_panel' %} active{% endif %}">
+                    <span class="menu-icon">📌</span><span class="menu-text">Mening topshiriqlarim</span>
+                </a>
+                <a href="{{ url_for('ijro_panel') }}" class="menu-item{% if request.endpoint == 'ijro_panel' %} active{% endif %}">
+                    <span class="menu-icon">📅</span><span class="menu-text">Ijro</span>
+                </a>
+            {% endif %}
         </nav>
 
         <div class="sidebar-bottom">
@@ -65,7 +112,7 @@
                 <div class="topbar-user">
                     <div class="avatar-small">AF</div>
                     <div class="topbar-user-name">
-                        {% if session.get('user_role') == 'manager' %}Rahbar{% elif session.get('user_role') == 'admin' %}Admin{% else %}Xodim{% endif %}
+                        {% if role == 'manager' %}Rahbar{% elif role == 'admin' %}Admin{% else %}Xodim{% endif %}
                     </div>
                 </div>
             </div>
