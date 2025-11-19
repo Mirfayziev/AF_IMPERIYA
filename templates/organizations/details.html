@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block header_title %}{{ org.name }}{% endblock %}
+{% block content %}
+
+<div class="page-title">
+  <h1>{{ org.name }}</h1>
+  <p class="subtitle">Tashkilot haqida to‘liq ma’lumot</p>
+</div>
+
+<div class="grid-main">
+
+  <!-- CHAP USTUN -->
+  <div class="column">
+    <div class="card-block">
+      <h2>Asosiy ma'lumotlar</h2>
+
+      <ul class="list">
+        <li><b>Nomi:</b> {{ org.name }}</li>
+        <li><b>Xodimlar soni:</b> {{ org.employee_count or 0 }}</li>
+        <li><b>Manzili:</b> {{ org.address or "—" }}</li>
+        <li><b>Qavati:</b> {{ org.floor or "—" }}</li>
+        <li><b>Izoh:</b> {{ org.comment or "—" }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- O‘NG USTUN – BIRIKTIRILGAN TRANSPORTLAR -->
+  <div class="column">
+    <div class="card-block">
+      <h2>Biriktilgan transportlar</h2>
+
+      <div class="task-short-list">
+        
+        {% for v in org.vehicles %}
+        <div class="task-row" onclick="window.location='/vehicles/{{ v.id }}'">
+          <div class="task-main">
+            <div class="task-title">{{ v.model }} ({{ v.plate_number }})</div>
+            <div class="task-meta">
+              Haydovchi: <b>{{ v.driver_full_name or '—' }}</b>
+            </div>
+          </div>
+          <div class="task-status-pill">{{ v.monthly_fuel_limit or 0 }} L</div>
+        </div>
+        {% else %}
+          <div class="empty-text">Transport biriktirilmagan.</div>
+        {% endfor %}
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
