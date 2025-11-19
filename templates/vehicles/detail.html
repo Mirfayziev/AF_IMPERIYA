@@ -1,33 +1,54 @@
 {% extends "base.html" %}
-{% block page_title %}Transport{% endblock %}
-{% block header_title %}Transport ma'lumotlari{% endblock %}
+{% block header_title %}{{ vehicle.model }}{% endblock %}
 {% block content %}
+
+<div class="page-title">
+  <h1>{{ vehicle.model }}</h1>
+  <p class="subtitle">{{ vehicle.plate_number }}</p>
+</div>
+
 <div class="grid-main">
+
   <div class="column">
     <div class="card-block">
-      <h2>{{ v.plate_number }} – {{ v.model }}</h2>
-      <div class="vehicle-img-big">
-        {% if v.image_path %}
-          <img src="{{ url_for('static', filename='uploads/' ~ v.image_path) }}">
-        {% else %}
-          🚗
-        {% endif %}
-      </div>
-      <ul class="list">
-        <li><b>Haydovchi:</b> {{ v.driver_full_name or "Biriktirilmagan" }}</li>
-        <li><b>Oylik limit:</b> {{ v.monthly_fuel_limit }} L</li>
-        <li><b>Oxirgi remont sanasi:</b> {{ v.last_repair_date or "—" }}</li>
-        <li><b>Holati:</b> {{ v.last_repair_status or "—" }}</li>
-        <li><b>Tizim tashkiloti:</b> {{ v.organization.name if v.organization else "Belgilanishi kerak" }}</li>
-      </ul>
-
-      <div style="margin-top:10px; display:flex; gap:8px;">
-        <a href="{{ url_for('vehicles_edit', vehicle_id=v.id) }}" class="btn-primary" style="text-decoration:none;display:inline-block;">Tahrirlash</a>
-        <form method="post" action="{{ url_for('vehicles_delete', vehicle_id=v.id) }}" onsubmit="return confirm('Rostdan o\'chirasizmi?');">
-          <button type="submit" class="btn-primary" style="background:#ef4444;">O'chirish</button>
-        </form>
-      </div>
+      <h2>Transport rasmi</h2>
+      {% if vehicle.photo %}
+      <img src="{{ url_for('static', filename='uploads/' ~ vehicle.photo) }}" class="vehicle-big-photo">
+      {% else %}
+      <img src="{{ url_for('static', filename='img/no_car.jpg') }}" class="vehicle-big-photo">
+      {% endif %}
     </div>
   </div>
+
+  <div class="column">
+
+    <div class="card-block">
+      <h2>Asosiy ma’lumotlar</h2>
+      <ul class="list">
+        <li><b>Model:</b> {{ vehicle.model }}</li>
+        <li><b>Davlat raqami:</b> {{ vehicle.plate_number }}</li>
+        <li><b>Haydovchi:</b> {{ vehicle.driver_full_name or "Biriktirilmagan" }}</li>
+        <li><b>Oylik limit:</b> {{ vehicle.monthly_fuel_limit or 0 }} L</li>
+        <li><b>Oxirgi ta’mir:</b> {{ vehicle.last_repair_date or "—" }}</li>
+      </ul>
+    </div>
+
+    {% if session.get("user_role") in ["admin","manager"] %}
+    <a href="/vehicles/edit/{{ vehicle.id }}" class="btn btn-warning">Tahrirlash</a>
+    {% endif %}
+
+  </div>
+
 </div>
+
+<style>
+.vehicle-big-photo{
+    width:100%;
+    height:260px;
+    object-fit:cover;
+    border-radius:12px;
+    border:1px solid #2e3448;
+}
+</style>
+
 {% endblock %}
