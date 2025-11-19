@@ -75,3 +75,37 @@
     border-color:#4b6bff;
 }
 .ijro-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+.badge{
+    padding:4px 10px;
+    border-radius:6px;
+    font-size:12px;
+    text-transform:uppercase;
+}
+.badge.new{background:#4b6bff;}
+.badge.in_progress{background:#f7b500;}
+.badge.done{background:#00c853;}
+.badge.rejected{background:#ff5252;}
+
+.desc{
+    margin:10px 0;
+    opacity:0.85;
+}
+.ijro-info div{
+    margin-bottom:4px;
+    font-size:13px;
+}
+.ijro-footer{
+    margin-top:15px;
+    display:flex;
+    gap:10px;
+}
+.btn-small{
+    padding:4px 10px;
+}
+</style>
+
+{% endblock %}
