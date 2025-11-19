@@ -1,8 +1,92 @@
-{% extends 'base.html' %}
-{% block header_title %}Outsorsing{% endblock %}
+{% extends "base.html" %}
 {% block content %}
-<div class="card-block">
-  <h2>Outsorsing tashkilotlar</h2>
-  <p>Keyinchalik bu yerda to'liq ro'yxat, xodimlar va shartnomalar ko'rinadi.</p>
+
+<div class="page-title">
+    <h1>Outsorsing kompaniyalari</h1>
 </div>
+
+{% if session.get("user_role") in ["admin","manager"] %}
+<div style="margin-bottom:15px;">
+    <a href="/outsourcing/create" class="btn btn-primary">+ Yangi kompaniya</a>
+</div>
+{% endif %}
+
+<div class="outs-grid">
+
+    {% for c in companies %}
+    <div class="outs-card" onclick="window.location='/outsourcing/{{ c.id }}'">
+
+        <div class="outs-header">
+            <h3>{{ c.name }}</h3>
+            <span class="badge blue">{{ c.service_type }}</span>
+        </div>
+
+        <div class="outs-body">
+            <div><b>Shartnoma №:</b> {{ c.contract_number or "—" }}</div>
+            <div><b>Sana:</b> {{ c.contract_date or "—" }}</div>
+            <div><b>Summasi:</b> {{ "%.2f"|format(c.contract_amount or 0) }} so‘m</div>
+        </div>
+
+        <div class="outs-footer">
+            <small>{{ c.comment[:80] if c.comment else "" }}</small>
+        </div>
+
+    </div>
+    {% else %}
+        <div class="empty-text">Hali birorta kompaniya kiritilmagan.</div>
+    {% endfor %}
+
+</div>
+
+<style>
+
+.outs-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(330px,1fr));
+    gap:14px;
+}
+
+.outs-card{
+    background:#1c1f2b;
+    padding:20px;
+    border-radius:14px;
+    border:1px solid #2e3448;
+    transition:0.25s;
+    cursor:pointer;
+}
+
+.outs-card:hover{
+    border-color:#4b6bff;
+}
+
+.outs-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.badge{
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:12px;
+}
+
+.badge.blue{
+    background:#4b6bff;
+}
+
+.outs-body div{
+    margin-bottom:4px;
+    font-size:14px;
+}
+
+.outs-footer{
+    margin-top:12px;
+    opacity:0.7;
+    font-size:12px;
+}
+
+</style>
+
 {% endblock %}
