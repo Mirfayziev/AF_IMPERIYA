@@ -1,15 +1,245 @@
 {% extends "base.html" %}
-{% block page_title %}Admin paneli{% endblock %}
-{% block header_title %}Admin paneli{% endblock %}
+{% block header_title %}Rahbar boshqaruv paneli{% endblock %}
 {% block content %}
+
+<div class="page-title">
+    <h1>AI Imperiya – Rahbar paneli</h1>
+    <p class="subtitle">Tizim bo‘yicha umumiy ko‘rsatkichlar va modullar nazorati</p>
+</div>
+
+<!-- 1-QATOR: STAT KARTALAR -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-label">Xodimlar soni</div>
+        <div class="stat-value">{{ total_employees or 0 }}</div>
+        <div class="stat-foot">Faol xodimlar</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Faol topshiriqlar</div>
+        <div class="stat-value">{{ active_tasks or 0 }}</div>
+        <div class="stat-foot">Ijro va umumiy tasklar</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Avto park</div>
+        <div class="stat-value">{{ vehicles_count or 0 }}</div>
+        <div class="stat-foot">Registratsiyadan o‘tgan transport</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Outsorsing</div>
+        <div class="stat-value">{{ outsource_count or 0 }}</div>
+        <div class="stat-foot">Amaldagi shartnomalar</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Bugungi Solar energiya</div>
+        <div class="stat-value">{{ solar_today_kwh or 0 }} kWh</div>
+        <div class="stat-foot">Barcha stansiyalar bo‘yicha</div>
+    </div>
+</div>
+
+<!-- 2-QATOR: GRAFIKLAR -->
 <div class="grid-main">
-  <div class="card-block">
-    <h2>Umumiy statistika</h2>
-    <ul class="list">
-      <li><b>Foydalanuvchilar:</b> {{ user_count }}</li>
-      <li><b>Topshiriqlar:</b> {{ task_count }}</li>
-      <li><b>Shartnoma summasi:</b> {{ '%.1f'|format(contract_sum or 0) }} $</li>
-    </ul>
+
+  <div class="column">
+    <div class="card-block">
+      <h2>Topshiriqlar holati</h2>
+      <canvas id="taskStatusChart" height="180"></canvas>
+    </div>
+    <div class="card-block">
+      <h2>Oylik ijro dinamikasi</h2>
+      <canvas id="ijroMonthlyChart" height="180"></canvas>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="card-block">
+      <h2>Solar energiya – so‘nggi 7 kun</h2>
+      <canvas id="solarWeeklyChart" height="210"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- 3-QATOR: MODULLAR RO‘YXATI -->
+<div class="card-block">
+  <h2>Modullar bo‘yicha tezkor o‘tish</h2>
+
+  <div class="modules-grid">
+
+    <a href="/tasks" class="module-card">
+      <div class="module-title">Umumiy topshiriqlar</div>
+      <div class="module-desc">Barcha tasklar, statuslar, filtrlash.</div>
+    </a>
+
+    <a href="/ijro" class="module-card">
+      <div class="module-title">Ijro paneli</div>
+      <div class="module-desc">Muddatli ijro topshiriqlar kalendar bilan.</div>
+    </a>
+
+    <a href="/vehicles" class="module-card">
+      <div class="module-title">Avtotransport</div>
+      <div class="module-desc">Haydovchi, limit, ta’mir, rasm bilan nazorat.</div>
+    </a>
+
+    <a href="/organizations" class="module-card">
+      <div class="module-title">Tizim tashkilotlar</div>
+      <div class="module-desc">Xodim soni, qavati, avto biriktirish.</div>
+    </a>
+
+    <a href="/outsourcing" class="module-card">
+      <div class="module-title">Outsorsing</div>
+      <div class="module-desc">Xizmat ko‘rsatuvchi kompaniyalar va shartnomalar.</div>
+    </a>
+
+    <a href="/orgtech" class="module-card">
+      <div class="module-title">Orgtexnika</div>
+      <div class="module-desc">Printer, kamera, skaner va boshqalar.</div>
+    </a>
+
+    <a href="/solar" class="module-card">
+      <div class="module-title">Solar panel</div>
+      <div class="module-desc">Stansiyalar va energiya statistikasi.</div>
+    </a>
+
+    <a href="/hr" class="module-card">
+      <div class="module-title">HR / Xodim profillari</div>
+      <div class="module-desc">Pasport, diplom, shaxsiy fayllar.</div>
+    </a>
+
   </div>
 </div>
+
+<style>
+.page-title h1{
+    font-size:28px;
+    color:#fff;
+    margin-bottom:4px;
+}
+.page-title .subtitle{
+    font-size:13px;
+    opacity:0.75;
+    margin-bottom:20px;
+}
+
+/* STAT KARTALAR */
+.stats-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:20px;
+}
+.stat-card{
+    flex:1;
+    min-width:160px;
+    background:#1b1f2a;
+    border-radius:14px;
+    padding:12px 14px;
+    border:1px solid #2e3448;
+}
+.stat-label{
+    font-size:12px;
+    opacity:0.7;
+}
+.stat-value{
+    font-size:22px;
+    margin:4px 0;
+}
+.stat-foot{
+    font-size:11px;
+    opacity:0.6;
+}
+
+/* MODULLAR GRID */
+.modules-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:12px;
+    margin-top:10px;
+}
+.module-card{
+    display:block;
+    background:#1c1f2b;
+    border-radius:12px;
+    padding:14px;
+    border:1px solid #2e3448;
+    text-decoration:none;
+    color:#fff;
+    transition:0.2s;
+}
+.module-card:hover{
+    border-color:#4b6bff;
+    transform:translateY(-2px);
+}
+.module-title{
+    font-size:15px;
+    margin-bottom:4px;
+}
+.module-desc{
+    font-size:12px;
+    opacity:0.7;
+}
+</style>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Backenddan keladigan JSON ma'lumotlar (keyin app.py da to'ldiramiz)
+  const taskStatusData = {{ task_status_data|safe }};   // {labels: [...], values:[...]}
+  const ijroMonthlyData = {{ ijro_monthly_data|safe }}; // {labels: [...], values:[...]}
+  const solarWeeklyData = {{ solar_weekly_data|safe }}; // {labels: [...], values:[...]}
+
+  // Task status chart
+  const ctx1 = document.getElementById('taskStatusChart').getContext('2d');
+  new Chart(ctx1, {
+    type: 'doughnut',
+    data: {
+      labels: taskStatusData.labels,
+      datasets: [{
+        data: taskStatusData.values
+      }]
+    },
+    options:{
+      plugins:{ legend:{ labels:{ color:'#fff' } } }
+    }
+  });
+
+  // Ijro monthly chart
+  const ctx2 = document.getElementById('ijroMonthlyChart').getContext('2d');
+  new Chart(ctx2, {
+    type: 'line',
+    data: {
+      labels: ijroMonthlyData.labels,
+      datasets: [{
+        data: ijroMonthlyData.values,
+        tension:0.3
+      }]
+    },
+    options:{
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{ color:'#ccc' }, grid:{ color:'#333'} },
+        y:{ ticks:{ color:'#ccc' }, grid:{ color:'#333'} }
+      }
+    }
+  });
+
+  // Solar weekly chart
+  const ctx3 = document.getElementById('solarWeeklyChart').getContext('2d');
+  new Chart(ctx3, {
+    type: 'bar',
+    data: {
+      labels: solarWeeklyData.labels,
+      datasets: [{
+        data: solarWeeklyData.values
+      }]
+    },
+    options:{
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{ color:'#ccc' }, grid:{ color:'#333'} },
+        y:{ ticks:{ color:'#ccc' }, grid:{ color:'#333'} }
+      }
+    }
+  });
+</script>
+
 {% endblock %}
