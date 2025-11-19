@@ -100,3 +100,16 @@ class IjroTask(db.Model):
     assigned_to_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     assigned_to = db.relationship("User")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+class EmployeeProfile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user = db.relationship("User")
+
+    full_name = db.Column(db.String(128))
+    passport_info = db.Column(db.String(255))
+    diploma_info = db.Column(db.String(255))
+    other_docs = db.Column(db.String(255))
+
+    passport_file = db.Column(db.String(255))
+    diploma_file = db.Column(db.String(255))
+    other_file = db.Column(db.String(255))
