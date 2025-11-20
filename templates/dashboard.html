@@ -4,294 +4,446 @@
 {% block content %}
 
 <style>
-/* PREMIUM MODERN LIGHT THEME, IMAGE-LIKE UI */
+    /* Umumiy fon – rasmga o‘xshash yorug‘ panel */
+    .dashboard-shell {
+        background: linear-gradient(180deg, #e5e7eb, #d1d5db);
+        border-radius: 24px;
+        padding: 20px 22px;
+        box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+        min-height: calc(100vh - 60px);
+    }
 
-/* Top statistic cards */
-.dashboard-stat-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 14px;
-    margin-bottom: 22px;
-}
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+    .dashboard-header-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #111827;
+    }
+    .dashboard-header-sub {
+        font-size: 13px;
+        color: #6b7280;
+    }
 
-.stat-card {
-    background: #ffffff;
-    padding: 16px 20px;
-    border-radius: 14px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    border: 1px solid #e5e7eb;
-}
-.stat-title {
-    font-size: 14px;
-    color: #6b7280;
-    margin-bottom: 5px;
-}
-.stat-value {
-    font-size: 26px;
-    font-weight: 700;
-    color: #111827;
-}
+    /* Yuqori stat kartalar */
+    .top-stat-row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+    .stat-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 14px 16px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+        border: 1px solid #e5e7eb;
+    }
+    .stat-label {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 4px;
+    }
+    .stat-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #111827;
+    }
 
-/* Section Grid */
-.section-2col {
-    display: grid;
-    grid-template-columns: 1.5fr 1.5fr;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-.section-3col {
-    display: grid;
-    grid-template-columns: 1.2fr 1.2fr 1.5fr;
-    gap: 20px;
-}
+    /* Asosiy grid – 3 ustunli bloklar */
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1.5fr 1.3fr;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
 
-/* Block Cards */
-.block-card {
-    background: #ffffff;
-    border-radius: 18px;
-    padding: 18px 20px;
-    box-shadow: 0 8px 22px rgba(0,0,0,0.05);
-    border: 1px solid #e6e6e6;
-}
-.block-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: #111827;
-}
+    .block-card {
+        background:#f9fafb;
+        border-radius: 16px;
+        padding: 16px 16px 10px;
+        border:1px solid #e5e7eb;
+        box-shadow: 0 10px 24px rgba(15,23,42,0.13);
+    }
+    .block-title-row {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:10px;
+    }
+    .block-title {
+        font-size:16px;
+        font-weight:700;
+        color:#111827;
+    }
+    .block-sub {
+        font-size:12px;
+        color:#9ca3af;
+    }
 
-/* Transport list */
-.car-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid #e5e7eb;
-}
-.car-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.car-info img {
-    width: 72px;
-    height: 48px;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
-}
-.car-data small {
-    font-size: 12px;
-    color: #6b7280;
-}
+    /* Tushgan topshiriqlar ro‘yxati */
+    .task-list {
+        list-style:none;
+        padding:0;
+        margin:0;
+    }
+    .task-item {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:7px 0;
+        border-bottom:1px solid #e5e7eb;
+        font-size:13px;
+    }
+    .task-main {
+        display:flex;
+        flex-direction:column;
+    }
+    .task-main span:first-child {
+        font-weight:600;
+        color:#111827;
+    }
+    .task-main span:last-child {
+        color:#6b7280;
+        font-size:12px;
+    }
+    .task-count {
+        font-weight:600;
+        color:#111827;
+    }
 
-/* Outsourcing table */
-.table {
-    width: 100%;
-    border-collapse: collapse;
-}
-.table th, .table td {
-    padding: 10px;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 14px;
-    color: #374151;
-}
+    /* Avto transportlar */
+    .car-row {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:8px 0;
+        border-bottom:1px solid #e5e7eb;
+        font-size:13px;
+    }
+    .car-info {
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+    .car-info img {
+        width:64px;
+        height:40px;
+        border-radius:10px;
+        object-fit:cover;
+        border:1px solid #e5e7eb;
+    }
+    .car-meta {
+        display:flex;
+        flex-direction:column;
+        gap:2px;
+    }
+    .car-meta strong {
+        color:#111827;
+    }
+    .pill {
+        padding:3px 7px;
+        border-radius:999px;
+        font-size:11px;
+        display:inline-block;
+    }
+    .pill-green { background:#dcfce7; color:#15803d; }
+    .pill-red { background:#fee2e2; color:#b91c1c; }
+    .pill-blue { background:#dbeafe; color:#1d4ed8; }
 
-/* Charts */
-.chart-box {
-    height: 260px;
-}
+    /* Shartnomalar jadvali */
+    .contract-table {
+        width:100%;
+        border-collapse:collapse;
+        font-size:12px;
+    }
+    .contract-table th,
+    .contract-table td {
+        padding:6px 6px;
+        border-bottom:1px solid #e5e7eb;
+        text-align:left;
+    }
+    .contract-table th {
+        color:#6b7280;
+        font-weight:600;
+    }
 
+    /* Pastki grid – tadbirlar, outsorsing, xodim grafigi */
+    .bottom-grid {
+        display:grid;
+        grid-template-columns:1.2fr 1.4fr 1.4fr;
+        gap:14px;
+        margin-top:6px;
+    }
+    .event-item {
+        display:flex;
+        justify-content:space-between;
+        padding:7px 0;
+        border-bottom:1px solid #e5e7eb;
+        font-size:12px;
+    }
+
+    .outsourcing-item {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:7px 0;
+        border-bottom:1px solid #e5e7eb;
+        font-size:12px;
+    }
+
+    .chart-box {
+        height:210px;
+    }
 </style>
 
-<!-- ========================= -->
-<!--       TOP STATISTICS      -->
-<!-- ========================= -->
 
-<div class="dashboard-stat-grid">
+<div class="dashboard-shell">
 
-    <div class="stat-card">
-        <div class="stat-title">Bajarilgan topshiriqlar</div>
-        <div class="stat-value">{{ completed_tasks }}</div>
+    <!-- Sarlavha -->
+    <div class="dashboard-header">
+        <div>
+            <div class="dashboard-header-title">Rahbar Paneli</div>
+            <div class="dashboard-header-sub">
+                Tizim bo‘yicha umumiy ko‘rsatkichlar va modullar nazorati
+            </div>
+        </div>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-title">Jarayonda</div>
-        <div class="stat-value">{{ in_progress }}</div>
+    <!-- Yuqori stat kartalar -->
+    <div class="top-stat-row">
+        <div class="stat-card">
+            <div class="stat-label">Umumiy topshiriqlar</div>
+            <div class="stat-value">{{ total_tasks|default(0) }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Bajarilgan</div>
+            <div class="stat-value">{{ completed_tasks|default(0) }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Jarayonda</div>
+            <div class="stat-value">{{ in_progress|default(0) }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Muddati o‘tgan</div>
+            <div class="stat-value">{{ overdue|default(0) }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Umumiy xodimlar</div>
+            <div class="stat-value">{{ total_employees|default(0) }}</div>
+        </div>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-title">Rad etilgan</div>
-        <div class="stat-value">{{ rejected }}</div>
-    </div>
+    <!-- Asosiy 3 ustunli blok -->
+    <div class="main-grid">
 
-    <div class="stat-card">
-        <div class="stat-title">Kutilmoqda</div>
-        <div class="stat-value">{{ pending }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-title">Umumiy xodimlar</div>
-        <div class="stat-value">{{ all_users }}</div>
-    </div>
-
-</div>
-
-
-<!-- ========================= -->
-<!--   MAIN 3-COLUMN SECTION   -->
-<!-- ========================= -->
-
-<div class="section-3col">
-
-    <!-- === LEFT COLUMN === -->
-    <div>
-
-        <!-- Xodim topshiriqlari (NEW) -->
+        <!-- 1-ustun: Tushgan topshiriqlar -->
         <div class="block-card">
-            <div class="block-title">Topshirqlar to‘plami</div>
+            <div class="block-title-row">
+                <div class="block-title">Tushgan topshiriqlar</div>
+                <div class="block-sub">Oxirgi topshiriqlar</div>
+            </div>
 
-            {% if latest_tasks %}
+            <ul class="task-list">
                 {% for t in latest_tasks %}
-                <div class="car-row">
-                    <div>
-                        <b>{{ t.title }}</b><br>
-                        <small>{{ t.deadline }}</small>
-                    </div>
-                    <span style="font-size:13px;color:#4b6bff;">{{ t.status }}</span>
-                </div>
+                    <li class="task-item">
+                        <div class="task-main">
+                            <span>{{ t.title }}</span>
+                            <span>{{ t.department or "Bo‘lim ko‘rsatilmagan" }}</span>
+                        </div>
+                        <div class="task-count">{{ t.count or 1 }}</div>
+                    </li>
+                {% else %}
+                    <li class="task-item">
+                        <span style="opacity:0.6;">Hozircha topshiriqlar yo‘q.</span>
+                    </li>
                 {% endfor %}
-            {% else %}
-                <p style="opacity:0.6;">Topshirqlar mavjud emas.</p>
-            {% endif %}
+            </ul>
         </div>
 
-    </div>
-
-    <!-- === MIDDLE COLUMN === -->
-    <div>
+        <!-- 2-ustun: Avto transportlar -->
         <div class="block-card">
-            <div class="block-title">Avto transportlar</div>
+            <div class="block-title-row">
+                <div class="block-title">Avto transportlar</div>
+                <div class="block-sub">Park bo‘yicha qisqacha ma’lumot</div>
+            </div>
 
             {% for v in vehicles %}
-            <div class="car-row">
-                <div class="car-info">
-                    <img src="{{ url_for('static', filename='img/cars/' + v.image) }}">
-                    <div class="car-data">
-                        <b>{{ v.model }}</b><br>
-                        <small>Yo‘l bosgan: {{ v.mileage }} km</small>
+                <div class="car-row">
+                    <div class="car-info">
+                        <img src="{{ url_for('static', filename='img/cars/' ~ (v.image or 'car1.png')) }}">
+                        <div class="car-meta">
+                            <strong>{{ v.model or "Noma’lum model" }}</strong>
+                            <span>Davlat raqami: {{ v.plate or "-" }}</span>
+                            <span>Kilometr: {{ v.mileage or 0 }} km</span>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="pill pill-green">{{ v.fuel_level or 0 }}%</div>
+                        <div class="pill pill-red" style="margin-top:4px;">
+                            {{ v.repair_days or 0 }} kun qoldi
+                        </div>
                     </div>
                 </div>
-
-                <div style="text-align:right;">
-                    <div style="color:#10b981; font-weight:600;">{{ v.fuel_level }}%</div>
-                    <small style="color:#ef4444;">{{ v.repair_days }} kun qoldi</small>
-                </div>
-            </div>
+            {% else %}
+                <p style="font-size:13px; opacity:0.7;">Transportlar hali kiritilmagan.</p>
             {% endfor %}
-
         </div>
+
+        <!-- 3-ustun: Shartnomalar -->
+        <div class="block-card">
+            <div class="block-title-row">
+                <div class="block-title">Shartnomalar</div>
+                <div class="block-sub">Asosiy kelishuvlar</div>
+            </div>
+
+            <table class="contract-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Summasi</th>
+                        <th>Holati</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in contracts %}
+                        <tr>
+                            <td>{{ c.name }}</td>
+                            <td>{{ c.amount }}</td>
+                            <td>{{ c.status }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="3">Shartnomalar kiritilmagan.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
-    <!-- === RIGHT COLUMN (charts) === -->
-    <div>
+    <!-- Pastki qism – Tadbirlar, Outsorsing, Xodim grafigi -->
+    <div class="bottom-grid">
 
+        <!-- Tadbirlar & mexmonlar -->
         <div class="block-card">
-            <div class="block-title">Xodimlar faoliyati</div>
-            <canvas id="employeeChart" class="chart-box"></canvas>
+            <div class="block-title-row">
+                <div class="block-title">Tadbirlar & mexmonlar</div>
+                <div class="block-sub">Rejalashtirilgan uchrashuvlar</div>
+            </div>
+
+            {% for e in events %}
+                <div class="event-item">
+                    <div>
+                        <strong>{{ e.title }}</strong><br>
+                        <span>{{ e.date }}</span>
+                    </div>
+                    <div>{{ e.budget }}</div>
+                </div>
+            {% else %}
+                <p style="font-size:13px; opacity:0.7;">Hozircha tadbirlar yo‘q.</p>
+            {% endfor %}
         </div>
 
-        <br>
-
+        <!-- Outsorsing xizmatlari -->
         <div class="block-card">
-            <div class="block-title">So‘nggi 7 kun – Solar energiya</div>
-            <canvas id="solarChart" class="chart-box"></canvas>
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- ========================= -->
-<!--       OUTSOURCING        -->
-<!-- ========================= -->
-
-<div class="section-2col">
-
-    <div class="block-card">
-        <div class="block-title">Outsorsing xizmatlari</div>
-
-        <table class="table">
-            <tr>
-                <th>Komapniya</th>
-                <th>Xizmat turi</th>
-                <th>Status</th>
-            </tr>
+            <div class="block-title-row">
+                <div class="block-title">Outsorsing xizmatlari</div>
+                <div class="block-sub">Faol kontraktlar</div>
+            </div>
 
             {% for o in outsourcing %}
-            <tr>
-                <td>{{ o.company }}</td>
-                <td>{{ o.service_type }}</td>
-                <td>{{ o.status }}</td>
-            </tr>
+                <div class="outsourcing-item">
+                    <div>
+                        <strong>{{ o.company }}</strong><br>
+                        <span style="color:#6b7280;">{{ o.service_type }}</span>
+                    </div>
+                    <div class="pill pill-blue">{{ o.status or "Faol" }}</div>
+                </div>
+            {% else %}
+                <p style="font-size:13px; opacity:0.7;">Outsorsing xizmatlari kiritilmagan.</p>
             {% endfor %}
-        </table>
-    </div>
-
-    <div class="block-card">
-        <div class="block-title">Tashkilotlar ro‘yxati</div>
-
-        {% for org in organizations %}
-        <div class="car-row">
-            <div>
-                <b>{{ org.name }}</b><br>
-                <small>Xodimlar: {{ org.employee_count }}</small>
-            </div>
-            <span style="font-size:13px;color:#4b6bff;">Batafsil →</span>
         </div>
-        {% endfor %}
+
+        <!-- Xodimlar grafigi -->
+        <div class="block-card">
+            <div class="block-title-row">
+                <div class="block-title">Xodimlar topshiriqlari & kunlik faoliyat</div>
+                <div class="block-sub">So‘nggi ko‘rsatkichlar</div>
+            </div>
+
+            <canvas id="employeeChart" class="chart-box"></canvas>
+            <canvas id="solarChart" class="chart-box" style="margin-top:10px;"></canvas>
+        </div>
+
     </div>
 
 </div>
 
-
-<!-- ========= CHART JS ========= -->
-
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-/* EMPLOYEE BAR CHART */
-new Chart(document.getElementById('employeeChart'), {
-    type: 'bar',
-    data: {
-        labels: {{ employee_names | safe }},
-        datasets: [{
-            label: "Topshiriqlar",
-            data: {{ employee_tasks | safe }},
-            backgroundColor: "#4b6bff",
-            borderRadius: 6
-        }]
-    },
-    options: { responsive: true }
-});
+    // Xodimlar bar chart
+    const empCtx = document.getElementById('employeeChart');
+    if (empCtx) {
+        new Chart(empCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ employee_names|default([])|safe }},
+                datasets: [{
+                    label: 'Topshiriqlar soni',
+                    data: {{ employee_task_counts|default([])|safe }},
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { ticks: { color: '#6b7280' } },
+                    y: { ticks: { color: '#6b7280' }, beginAtZero:true }
+                }
+            }
+        });
+    }
 
-/* SOLAR LINE CHART */
-new Chart(document.getElementById('solarChart'), {
-    type: 'line',
-    data: {
-        labels: {{ solar_labels | safe }},
-        datasets: [{
-            label: "kWh",
-            data: {{ solar_values | safe }},
-            borderColor: "#22c55e",
-            fill: false,
-            tension: 0.4,
-            borderWidth: 3
-        }]
-    },
-    options: { responsive: true }
-});
+    // Solar line chart (o‘ngdagi ko‘k grafik)
+    const solarCtx = document.getElementById('solarChart');
+    if (solarCtx) {
+        new Chart(solarCtx, {
+            type: 'line',
+            data: {
+                labels: {{ solar_labels|default([])|safe }},
+                datasets: [{
+                    label: 'Solar energiya (kWh)',
+                    data: {{ solar_values|default([])|safe }},
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34,197,94,0.15)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels:{ color:'#6b7280' }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color:'#6b7280' } },
+                    y: { ticks: { color:'#6b7280' }, beginAtZero:true }
+                }
+            }
+        });
+    }
 </script>
 
 {% endblock %}
