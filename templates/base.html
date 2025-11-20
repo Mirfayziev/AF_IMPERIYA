@@ -4,208 +4,142 @@
     <meta charset="UTF-8">
     <title>{% block header_title %}AI IMPERIYA{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <style>
         body{
             margin:0;
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', Arial, sans-serif;
             background:#020617;
             color:#e5e7eb;
         }
+
         .layout{
             display:flex;
             min-height:100vh;
         }
+
+        /* ===== SIDEBAR ===== */
         .sidebar{
-            width:220px;
-            background:#020617;
+            width:240px;
+            background:#030b1e;
             border-right:1px solid #1f2937;
-            padding:16px 12px;
+            padding:18px 14px;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.4);
         }
+
         .logo-wrap{
             display:flex;
             align-items:center;
-            gap:8px;
-            margin-bottom:20px;
+            gap:10px;
+            margin-bottom:26px;
         }
+
         .logo{
-            width:36px;
-            height:36px;
-            border-radius:8px;
+            width:42px;
+            height:42px;
+            border-radius:10px;
             object-fit:cover;
+            box-shadow: 0 0 12px #4b6bff;
         }
+
         .logo-text{
-            font-weight:bold;
-            font-size:16px;
+            font-weight:700;
+            font-size:18px;
+            letter-spacing:1px;
+            color:#93c5fd;
+            text-shadow: 0 0 8px #2563eb;
         }
-        .menu a{
+
+        nav.menu a{
             display:block;
-            padding:8px 10px;
-            margin-bottom:4px;
-            color:#e5e7eb;
+            padding:10px 12px;
+            margin-bottom:6px;
             text-decoration:none;
-            border-radius:8px;
-            font-size:14px;
+            color:#d1d5db;
+            font-size:15px;
+            border-radius:10px;
+            transition:0.2s ease;
         }
-        .menu a:hover{
+
+        nav.menu a:hover{
             background:#111827;
+            color:#60a5fa;
+            box-shadow: inset 0 0 10px rgba(27,100,255,0.4);
         }
-        .menu .logout{
-            margin-top:10px;
-            color:#f97373;
+
+        nav.menu .logout{
+            margin-top:14px;
+            color:#f87171 !important;
         }
+
+        /* ===== CONTENT ===== */
         .content{
             flex:1;
-            padding:18px 20px;
+            padding:22px 28px;
         }
+
         .page-title h1{
             margin:0;
+            font-size:26px;
         }
+
+        /* CARD BLOCKS */
         .card-block{
-            background:#020617;
-            border-radius:14px;
+            background:#050c25;
+            border-radius:16px;
             border:1px solid #1f2937;
-            padding:16px 18px;
-            margin-bottom:16px;
+            padding:18px 20px;
+            margin-bottom:18px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.35);
         }
-        .grid-main{
-            display:grid;
-            grid-template-columns:2fr 2fr;
-            gap:16px;
-        }
-        .column{
-            display:flex;
-            flex-direction:column;
-            gap:16px;
-        }
-        .list{
-            list-style:none;
-            padding:0;
-            margin:0;
-        }
-        .list li{
-            margin-bottom:6px;
-        }
-        .empty-text{
-            font-size:13px;
-            opacity:0.7;
-        }
-        .btn{
-            display:inline-block;
-            padding:6px 12px;
-            border-radius:8px;
-            font-size:13px;
-            border:none;
-            cursor:pointer;
-            text-decoration:none;
-        }
-        .btn-primary{
-            background:#4f46e5;
-            color:#fff;
-        }
-        .btn-warning{
-            background:#eab308;
-            color:#030712;
-        }
-        .task-short-list{}
-        .task-row{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:10px;
-            margin-bottom:8px;
-            background:#020617;
-            border-radius:10px;
-            border:1px solid #1f2937;
-            cursor:pointer;
-        }
-        .task-row:hover{
-            border-color:#4b6bff;
-        }
-        .task-title{
-            font-size:15px;
-        }
-        .task-status-pill{
-            padding:4px 8px;
-            border-radius:6px;
-            font-size:11px;
-        }
-        .status-new{ background:#4b6bff; }
-        .status-in_progress{ background:#fbbf24; color:#111827;}
-        .status-done{ background:#22c55e; }
-        .status-rejected{ background:#ef4444; }
-        .org-grid{
-            display:grid;
-            grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-            gap:14px;
-        }
-        .org-card{
-            background:#020617;
-            border-radius:14px;
-            border:1px solid #1f2937;
-            padding:16px;
-            cursor:pointer;
-        }
-        .org-card:hover{ border-color:#4b6bff; }
-        .org-header{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            margin-bottom:8px;
-        }
-        .org-count{
-            background:#4b6bff;
-            padding:4px 8px;
-            border-radius:8px;
-            font-size:12px;
-        }
-        .table{
-            width:100%;
-            border-collapse:collapse;
-            font-size:13px;
-        }
-        .table th,.table td{
-            border:1px solid #1f2937;
-            padding:6px 8px;
-        }
+
     </style>
 </head>
+
 <body>
 
 <div class="layout">
 
+    <!-- ===== SIDEBAR ===== -->
     <aside class="sidebar">
+
         <div class="logo-wrap">
             <img src="{{ url_for('static', filename='img/af_logo.png') }}" class="logo">
             <div class="logo-text">AI IMPERIYA</div>
         </div>
 
         <nav class="menu">
+
             {% if session.get("user_role") == "admin" %}
-                <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
-                <a href="{{ url_for('organizations_list') }}">Tashkilotlar</a>
-                <a href="{{ url_for('vehicle_list') }}">Transport</a>
-                <a href="{{ url_for('orgtech_list') }}">OrgTexnika</a>
-                <a href="{{ url_for('outsourcing_list') }}">Outsorsing</a>
-                <a href="{{ url_for('solar_dashboard') }}">Solar</a>
-                <a href="{{ url_for('ijro_list') }}">Ijro</a>
-                <a href="{{ url_for('hr_list') }}">Xodimlar</a>
+                <a href="{{ url_for('admin_dashboard') }}">📊 Dashboard</a>
+                <a href="{{ url_for('organizations_list') }}">🏢 Tashkilotlar</a>
+                <a href="{{ url_for('vehicle_list') }}">🚗 Transport</a>
+                <a href="{{ url_for('orgtech_list') }}">🖨 OrgTexnika</a>
+                <a href="{{ url_for('outsourcing_list') }}">🛠 Outsorsing</a>
+                <a href="{{ url_for('solar_dashboard') }}">🔆 Solar</a>
+                <a href="{{ url_for('ijro_list') }}">📝 Ijro</a>
+                <a href="{{ url_for('hr_list') }}">👥 Xodimlar</a>
+
             {% elif session.get("user_role") == "manager" %}
-                <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
-                <a href="{{ url_for('vehicle_list') }}">Transport</a>
-                <a href="{{ url_for('solar_dashboard') }}">Solar</a>
-                <a href="{{ url_for('ijro_list') }}">Ijro</a>
+                <a href="{{ url_for('admin_dashboard') }}">📊 Dashboard</a>
+                <a href="{{ url_for('vehicle_list') }}">🚗 Transport</a>
+                <a href="{{ url_for('solar_dashboard') }}">🔆 Solar</a>
+                <a href="{{ url_for('ijro_list') }}">📝 Ijro</a>
+
             {% elif session.get("user_role") == "employee" %}
-                <a href="{{ url_for('employee_dashboard') }}">Mening panelim</a>
-                <a href="{{ url_for('ijro_list') }}">Ijro</a>
-                <a href="{{ url_for('hr_profile', user_id=session.get('user_id')) }}">Profil</a>
+                <a href="{{ url_for('employee_dashboard') }}">📌 Mening panelim</a>
+                <a href="{{ url_for('ijro_list') }}">📝 Ijro topshiriqlar</a>
+                <a href="{{ url_for('hr_profile', user_id=session.get('user_id')) }}">👤 Profil</a>
             {% endif %}
 
-            {% if session.get('user_id') %}
-                <a href="{{ url_for('logout') }}" class="logout">Chiqish</a>
+            {% if session.get("user_id") %}
+                <a href="{{ url_for('logout') }}" class="logout">🚪 Chiqish</a>
             {% endif %}
         </nav>
+
     </aside>
 
+    <!-- ===== CONTENT ===== -->
     <main class="content">
         {% block content %}{% endblock %}
     </main>
