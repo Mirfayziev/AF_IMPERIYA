@@ -491,23 +491,56 @@ def ijro_calendar():
 
 # ---------- HR ----------
 
-@app.route("/hr/list")
+@app.route("/hr")
 @login_required
 def hr_list():
     if session.get("user_role") not in ["admin", "manager"]:
         return redirect(url_for("login"))
-    users = User.query.filter(User.role != "admin").all()
+
+    users = User.query.filter(User.role == "employee").all()
     return render_template("hr/list.html", users=users)
+
+
+
+@app.route("/hr/create", methods=["GET", "POST"])
+@login_required
+def hr_create():
+    if session.get("user_role") not in ["admin", "manager"]:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        full_name = request.form["full_name"]
+        position = request.form["position"]
+        phone = request.form["phone"]
+
+        new_user = User(
+            username=username,
+            password=password,
+            full_name=full_name,
+            position=position,
+            phone=phone,
+            role="employee"
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        return redirect(url_for("hr_list"))
+
+    return render_template("hr/create.html")
+
 
 
 @app.route("/hr/profile/<int:user_id>")
 @login_required
 def hr_profile(user_id):
-    # Employee o‘zi faqat o‘z profilini ko‘radi
     if session.get("user_role") == "employee" and session.get("user_id") != user_id:
         return redirect(url_for("employee_dashboard"))
+
     u = User.query.get_or_404(user_id)
     return render_template("hr/profile.html", user=u)
+
 
 
 @app.route("/hr/edit/<int:user_id>", methods=["GET", "POST"])
@@ -552,6 +585,7 @@ def hr_edit(user_id):
         return redirect(url_for("hr_profile", user_id=user_id))
 
     return render_template("hr/edit.html", user=u)
+
 
 
 # ---------- MAIN ----------
