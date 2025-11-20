@@ -32,8 +32,7 @@ def login_required(f):
 
 
 # ---------- INIT DB & DEFAULT ADMIN ----------
-@app.before_first_request
-def init_db():
+with app.app_context():
     db.create_all()
     if not User.query.filter_by(username="admin").first():
         admin = User(
@@ -44,6 +43,7 @@ def init_db():
         )
         db.session.add(admin)
         db.session.commit()
+
 
 
 # ---------- LOGIN ----------
