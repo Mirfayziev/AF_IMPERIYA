@@ -1,379 +1,274 @@
 {% extends "base.html" %}
-{% block header_title %}Rahbar paneli{% endblock %}
-{% block page_title %}Rahbar paneli{% endblock %}
-
-{% block extra_head %}
-<style>
-    .top-stat-row{
-        display:grid;
-        grid-template-columns:repeat(5,1fr);
-        gap:10px;
-        margin-bottom:12px;
-    }
-    .stat-card{
-        background:#ffffff;
-        border-radius:14px;
-        padding:10px 12px;
-        box-shadow:0 8px 20px rgba(15,23,42,0.12);
-        border:1px solid #e5e7eb;
-    }
-    .stat-label{
-        font-size:12px;
-        color:#6b7280;
-        margin-bottom:4px;
-    }
-    .stat-value{
-        font-size:20px;
-        font-weight:700;
-        color:#111827;
-    }
-
-    .main-grid{
-        display:grid;
-        grid-template-columns:1.3fr 1.5fr 1.4fr;
-        gap:10px;
-        margin-bottom:10px;
-    }
-    .block-card{
-        background:#f9fafb;
-        border-radius:16px;
-        padding:12px 14px;
-        border:1px solid #e5e7eb;
-        box-shadow:0 10px 24px rgba(15,23,42,0.10);
-        height:255px;
-        overflow:hidden;
-    }
-    .block-header{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-bottom:8px;
-    }
-    .block-title{
-        font-size:15px;
-        font-weight:700;
-        color:#111827;
-    }
-    .block-sub{
-        font-size:11px;
-        color:#9ca3af;
-    }
-
-    /* Tushgan topshiriqlar ro'yxati */
-    .task-list{
-        list-style:none;
-        margin:0;
-        padding:0;
-    }
-    .task-item{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        padding:5px 0;
-        border-bottom:1px solid #e5e7eb;
-        font-size:12px;
-    }
-    .task-left span:first-child{
-        font-weight:600;
-        color:#111827;
-    }
-    .task-left span:last-child{
-        font-size:11px;
-        color:#6b7280;
-    }
-
-    /* Avto transportlar */
-    .car-row{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        padding:7px 0;
-        border-bottom:1px solid #e5e7eb;
-        font-size:12px;
-    }
-    .car-info{
-        display:flex;
-        align-items:center;
-        gap:8px;
-    }
-    .car-info img{
-        width:60px;
-        height:38px;
-        border-radius:10px;
-        border:1px solid #e5e7eb;
-        object-fit:cover;
-    }
-    .car-meta strong{
-        display:block;
-        color:#111827;
-    }
-    .car-meta small{
-        display:block;
-        color:#6b7280;
-        font-size:11px;
-    }
-    .pill{
-        padding:3px 7px;
-        border-radius:999px;
-        font-size:10px;
-        display:inline-block;
-    }
-    .pill-green{background:#dcfce7;color:#15803d;}
-    .pill-red{background:#fee2e2;color:#b91c1c;}
-    .pill-blue{background:#dbeafe;color:#1d4ed8;}
-
-    /* Shartnomalar jadvali */
-    .contract-table{
-        width:100%;
-        border-collapse:collapse;
-        font-size:11px;
-    }
-    .contract-table th,
-    .contract-table td{
-        padding:4px 4px;
-        border-bottom:1px solid #e5e7eb;
-        text-align:left;
-    }
-    .contract-table th{
-        color:#6b7280;
-        font-weight:600;
-    }
-
-    /* Pastki grid */
-    .bottom-grid{
-        display:grid;
-        grid-template-columns:1.2fr 1.4fr 1.4fr;
-        gap:10px;
-        margin-top:6px;
-    }
-    .small-block{
-        background:#f9fafb;
-        border-radius:16px;
-        padding:10px 12px;
-        border:1px solid #e5e7eb;
-        box-shadow:0 10px 24px rgba(15,23,42,0.10);
-        height:220px;
-        overflow:hidden;
-    }
-    .event-item, .outs-item{
-        display:flex;
-        justify-content:space-between;
-        padding:5px 0;
-        border-bottom:1px solid #e5e7eb;
-        font-size:11px;
-    }
-
-    .chart-box{
-        height:160px;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 
-<div class="top-stat-row">
-    <div class="stat-card">
-        <div class="stat-label">Umumiy topshiriqlar</div>
-        <div class="stat-value">{{ total_tasks|default(0) }}</div>
+<style>
+    .stats-grid{
+        display:grid;
+        grid-template-columns:repeat(5,1fr);
+        gap:14px;
+        margin-bottom:20px;
+    }
+    .stat-box{
+        background:#0f172a;
+        border:1px solid #1e293b;
+        padding:18px;
+        border-radius:12px;
+        box-shadow:0 0 0 1px #1e293b inset;
+    }
+    .stat-title{
+        font-size:13px;
+        opacity:0.7;
+    }
+    .stat-value{
+        font-size:26px;
+        font-weight:bold;
+        margin-top:4px;
+    }
+    /* Kichik grafik kartalari */
+    .chart-box{
+        background:#0f172a;
+        border-radius:14px;
+        border:1px solid #1e293b;
+        padding:14px;
+        height:200px;
+        cursor:pointer;
+        transition:0.25s;
+    }
+    .chart-box:hover{
+        border-color:#3b82f6;
+        transform:scale(1.02);
+    }
+    .charts-grid{
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:16px;
+    }
+
+    /* --- MODAL --- */
+    #chartModal{
+        position:fixed;
+        left:0; top:0;
+        width:100%; height:100%;
+        background:rgba(0,0,0,0.6);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        z-index:99999;
+        backdrop-filter:blur(4px);
+    }
+    #chartModal .modal-content{
+        background:#fff;
+        width:80%;
+        max-width:900px;
+        padding:20px;
+        border-radius:16px;
+        position:relative;
+    }
+    #chartModal button{
+        position:absolute;
+        top:10px;
+        right:10px;
+        background:#f3f4f6;
+        border:none;
+        padding:6px 10px;
+        border-radius:8px;
+        cursor:pointer;
+        font-size:16px;
+    }
+</style>
+
+
+
+
+<h2>AI Imperiya – Rahbar paneli</h2>
+
+<div class="stats-grid">
+
+    <div class="stat-box">
+        <div class="stat-title">Umumiy topshiriqlar</div>
+        <div class="stat-value">{{ total_tasks }}</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Bajarilgan</div>
-        <div class="stat-value>{{ completed_tasks|default(0) }}</div>
+
+    <div class="stat-box">
+        <div class="stat-title">Jarayondagi topshiriqlar</div>
+        <div class="stat-value">{{ in_progress }}</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Jarayonda</div>
-        <div class="stat-value">{{ in_progress|default(0) }}</div>
+
+    <div class="stat-box">
+        <div class="stat-title">Bajarilgan topshiriqlar</div>
+        <div class="stat-value">{{ completed_tasks }}</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Muddati o‘tgan</div>
-        <div class="stat-value">{{ overdue|default(0) }}</div>
+
+    <div class="stat-box">
+        <div class="stat-title">Elektr iste’moli</div>
+        <div class="stat-value">{{ total_energy }} kWh</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Umumiy xodimlar</div>
-        <div class="stat-value">{{ total_employees|default(0) }}</div>
+
+    <div class="stat-box">
+        <div class="stat-title">So‘nggi solar energiya</div>
+        <div class="stat-value">{{ last_solar or 0 }} kWh</div>
     </div>
+
 </div>
 
-<div class="main-grid">
 
-    <!-- Tushgan topshiriqlar -->
-    <div class="block-card">
-        <div class="block-header">
-            <div class="block-title">Tushgan topshiriqlar</div>
-            <div class="block-sub">So'nggi buyruqlar</div>
-        </div>
-        <ul class="task-list">
-            {% for t in latest_tasks %}
-                <li class="task-item">
-                    <div class="task-left">
-                        <span>{{ t.title }}</span><br>
-                        <span>{{ t.department or "Bo‘lim ko‘rsatilmagan" }}</span>
-                    </div>
-                    <div><b>{{ t.count or 1 }}</b></div>
-                </li>
-            {% else %}
-                <li class="task-item">
-                    <span style="opacity:0.6;">Hozircha topshiriqlar yo‘q.</span>
-                </li>
-            {% endfor %}
-        </ul>
+<h3>Topshiriqlar holati</h3>
+
+<div class="charts-grid">
+
+    <div class="chart-box" onclick="openChartModal('ijro')">
+        <canvas id="ijroChart"></canvas>
     </div>
 
-    <!-- Avto transportlar -->
-    <div class="block-card">
-        <div class="block-header">
-            <div class="block-title">Avto transportlar</div>
-            <div class="block-sub">Park bo‘yicha ko‘rsatkichlar</div>
-        </div>
-
-        {% for v in vehicles %}
-            <div class="car-row">
-                <div class="car-info">
-                    <img src="{{ url_for('static', filename='img/cars/' ~ (v.image or 'car1.png')) }}">
-                    <div class="car-meta">
-                        <strong>{{ v.model or "Model" }}</strong>
-                        <small>Raqam: {{ v.plate or "-" }}</small>
-                        <small>Yo‘l: {{ v.mileage or 0 }} km</small>
-                    </div>
-                </div>
-                <div style="text-align:right;">
-                    <div class="pill pill-green">{{ v.fuel_level or 0 }}%</div>
-                    <div class="pill pill-red" style="margin-top:4px;">
-                        {{ v.repair_days or 0 }} kun qoldi
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <p style="font-size:12px;opacity:0.7;">Transportlar kiritilmagan.</p>
-        {% endfor %}
+    <div class="chart-box" onclick="openChartModal('oylik')">
+        <canvas id="monthlyChart"></canvas>
     </div>
 
-    <!-- Shartnomalar -->
-    <div class="block-card">
-        <div class="block-header">
-            <div class="block-title">Shartnomalar</div>
-            <div class="block-sub">Asosiy kelishuvlar</div>
-        </div>
-        <table class="contract-table">
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Summasi</th>
-                    <th>Holati</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in contracts %}
-                    <tr>
-                        <td>{{ c.name }}</td>
-                        <td>{{ c.amount }}</td>
-                        <td>{{ c.status }}</td>
-                    </tr>
-                {% else %}
-                    <tr><td colspan="3">Shartnomalar kiritilmagan.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="chart-box" onclick="openChartModal('solar')">
+        <canvas id="solarChart"></canvas>
     </div>
 
 </div>
 
-<div class="bottom-grid">
 
-    <!-- Tadbirlar & mexmonlar -->
-    <div class="small-block">
-        <div class="block-header">
-            <div class="block-title">Tadbirlar & mexmonlar</div>
-        </div>
-        {% for e in events %}
-            <div class="event-item">
-                <div>
-                    <strong>{{ e.title }}</strong><br>
-                    <span>{{ e.date }}</span>
-                </div>
-                <div>{{ e.budget }}</div>
-            </div>
-        {% else %}
-            <p style="font-size:12px;opacity:0.7;">Tadbirlar kiritilmagan.</p>
-        {% endfor %}
-    </div>
-
-    <!-- Outsorsing xizmatlari -->
-    <div class="small-block">
-        <div class="block-header">
-            <div class="block-title">Outsorsing xizmatlari</div>
-        </div>
-        {% for o in outsourcing %}
-            <div class="outs-item">
-                <div>
-                    <strong>{{ o.company }}</strong><br>
-                    <span style="color:#6b7280;">{{ o.service_type }}</span>
-                </div>
-                <div class="pill pill-blue">{{ o.status or "Faol" }}</div>
-            </div>
-        {% else %}
-            <p style="font-size:12px;opacity:0.7;">Outsorsing xizmatlari yo‘q.</p>
-        {% endfor %}
-    </div>
-
-    <!-- Xodimlar grafigi & Solar -->
-    <div class="small-block">
-        <div class="block-header">
-            <div class="block-title">Xodimlar topshiriqlari & solar</div>
-        </div>
-        <canvas id="employeeChart" class="chart-box"></canvas>
-        <canvas id="solarChart" class="chart-box" style="margin-top:6px;"></canvas>
+<!-- ====================== MODAL ======================= -->
+<div id="chartModal">
+    <div class="modal-content">
+        <button onclick="closeModal()">✕</button>
+        <canvas id="modalChart" style="height:420px;"></canvas>
     </div>
 </div>
+<!-- ==================================================== -->
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-const empEl = document.getElementById('employeeChart');
-if (empEl){
-    new Chart(empEl,{
-        type:'bar',
+
+    /* ============ IJRO DONUT ============= */
+    new Chart(document.getElementById("ijroChart"), {
+        type:'doughnut',
         data:{
-            labels: {{ employee_names|default([])|safe }},
+            labels:["Bajarilgan","Jarayonda","Bekor qilingan"],
             datasets:[{
-                data: {{ employee_task_counts|default([])|safe }},
-                backgroundColor:'#3b82f6',
-                borderRadius:6
+                data:[
+                    {{ completed_tasks }},
+                    {{ in_progress }},
+                    {{ rejected_tasks|default(0) }}
+                ],
+                backgroundColor:["#22c55e","#fbbf24","#ef4444"],
+                borderWidth:1
             }]
         },
-        options:{
-            plugins:{legend:{display:false}},
-            scales:{
-                x:{ticks:{color:'#6b7280'}},
-                y:{ticks:{color:'#6b7280'},beginAtZero:true}
-            }
-        }
+        options:{responsive:true}
     });
-}
-const solarEl = document.getElementById('solarChart');
-if (solarEl){
-    new Chart(solarEl,{
+
+
+    /* ============ OYLIK DINAMIKA ============= */
+    new Chart(document.getElementById("monthlyChart"), {
         type:'line',
         data:{
-            labels: {{ solar_labels|default([])|safe }},
+            labels: {{ monthly_labels|safe }},
             datasets:[{
-                label:'kWh',
-                data: {{ solar_values|default([])|safe }},
-                borderColor:'#22c55e',
-                backgroundColor:'rgba(34,197,94,0.15)',
-                fill:true,
+                label:"Oylik ijro",
+                data: {{ monthly_values|safe }},
+                borderColor:"#3b82f6",
+                backgroundColor:"rgba(59,130,246,0.18)",
+                borderWidth:2,
                 tension:0.4,
-                borderWidth:2
+                fill:true
             }]
         },
-        options:{
-            plugins:{legend:{labels:{color:'#6b7280'}}},
-            scales:{
-                x:{ticks:{color:'#6b7280'}},
-                y:{ticks:{color:'#6b7280'},beginAtZero:true}
-            }
-        }
+        options:{responsive:true}
     });
-}
+
+
+    /* ============ SOLAR LINE ============= */
+    new Chart(document.getElementById("solarChart"), {
+        type:'line',
+        data:{
+            labels: {{ solar_labels|safe }},
+            datasets:[{
+                label:"Solar (kWh)",
+                data: {{ solar_values|safe }},
+                borderColor:"#22c55e",
+                backgroundColor:"rgba(34,197,94,0.18)",
+                borderWidth:2,
+                tension:0.4,
+                fill:true
+            }]
+        },
+        options:{responsive:true}
+    });
+
+
+    /* =================== MODAL LOGIC =================== */
+
+    let modalChartInstance = null;
+
+    function openChartModal(type){
+        document.getElementById("chartModal").style.display = "flex";
+
+        const ctx = document.getElementById("modalChart").getContext("2d");
+        if(modalChartInstance){ modalChartInstance.destroy(); }
+
+        if(type === "solar"){
+            modalChartInstance = new Chart(ctx,{
+                type:'line',
+                data:{
+                    labels: {{ solar_labels|safe }},
+                    datasets:[{
+                        label:"Solar energiya (kWh)",
+                        data: {{ solar_values|safe }},
+                        borderColor:"#22c55e",
+                        backgroundColor:"rgba(34,197,94,0.2)",
+                        fill:true,
+                        tension:0.4
+                    }]
+                }
+            });
+        }
+
+        if(type === "ijro"){
+            modalChartInstance = new Chart(ctx,{
+                type:'doughnut',
+                data:{
+                    labels:["Bajarilgan","Jarayonda","Bekor qilingan"],
+                    datasets:[{
+                        data:[
+                            {{ completed_tasks }},
+                            {{ in_progress }},
+                            {{ rejected_tasks|default(0) }}
+                        ],
+                        backgroundColor:["#22c55e","#fbbf24","#ef4444"]
+                    }]
+                }
+            });
+        }
+
+        if(type === "oylik"){
+            modalChartInstance = new Chart(ctx,{
+                type:'line',
+                data:{
+                    labels: {{ monthly_labels|safe }},
+                    datasets:[{
+                        label:"Oylik ijro dinamikasi",
+                        data: {{ monthly_values|safe }},
+                        borderColor:"#3b82f6",
+                        backgroundColor:"rgba(59,130,246,0.2)",
+                        fill:true,
+                        tension:0.4
+                    }]
+                }
+            });
+        }
+    }
+
+    function closeModal(){
+        document.getElementById("chartModal").style.display = "none";
+    }
+
 </script>
 
 {% endblock %}
